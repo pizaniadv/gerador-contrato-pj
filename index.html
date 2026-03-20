@@ -446,6 +446,12 @@
           <input class="campo-input" id="ctda_rep_cargo" placeholder="Ex.: Administrador, Titular">
         </div>
       </div>
+      <div class="campo-grupo">
+        <div class="campo-label">CPF do Responsável Legal <span class="tag-opcional">(opcional)</span>
+          <div class="tooltip-wrap"><button class="tooltip-btn">?</button><div class="tooltip-box">CPF da pessoa que vai assinar o contrato pela empresa contratada.</div></div>
+        </div>
+        <input class="campo-input" id="ctda_rep_cpf" placeholder="000.000.000-00" maxlength="14" oninput="mascararCPF(this)" style="max-width:220px">
+      </div>
 
       <div class="secao-titulo">Endereço da Contratada</div>
       <div class="campo-grupo">
@@ -1146,7 +1152,7 @@ function gerarHTMLContrato() {
 <div class="partes">
 <p><strong>CONTRATANTE:</strong> ${g('cont_nome')}, pessoa jurídica de direito privado, inscrita no CNPJ sob o nº ${g('cont_cnpj')}, com sede em ${endCont}, neste ato representada por seu ${g('cont_rep_cargo')}, ${g('cont_rep')}, portador do CPF nº ${g('cont_rep_cpf')}.</p>
 <br>
-<p><strong>CONTRATADA:</strong> ${g('ctda_nome')}, ${g('ctda_qual')}, inscrita no CNPJ sob o nº ${g('ctda_cnpj')}, com sede em ${endCtda}${g('ctda_rep') ? ', neste ato representada por seu ' + (g('ctda_rep_cargo')||'representante legal') + ', ' + g('ctda_rep') : ''}.</p>
+<p><strong>CONTRATADA:</strong> ${g('ctda_nome')}, ${g('ctda_qual')}, inscrita no CNPJ sob o nº ${g('ctda_cnpj')}, com sede em ${endCtda}${g('ctda_rep') ? ', neste ato representada por seu ' + (g('ctda_rep_cargo')||'representante legal') + ', ' + g('ctda_rep') + (g('ctda_rep_cpf') ? ', portador do CPF nº ' + g('ctda_rep_cpf') : '') : ''}.</p>
 <br>
 <p>As partes acima qualificadas celebram o presente Contrato de Prestação de Serviços Técnicos, que se regerá pelas seguintes cláusulas e condições:</p>
 </div>`;
@@ -1293,7 +1299,7 @@ async function exportarDocx() {
   body += wLn();
   body += wParBold('CONTRATANTE: ', `${g('cont_nome')}, pessoa jurídica de direito privado, inscrita no CNPJ sob o nº ${g('cont_cnpj')}, com sede em ${endCont}, neste ato representada por seu ${g('cont_rep_cargo')}, ${g('cont_rep')}, portador do CPF nº ${g('cont_rep_cpf')}.`);
   body += wLn();
-  body += wParBold('CONTRATADA: ', `${g('ctda_nome')}, ${g('ctda_qual')}, inscrita no CNPJ sob o nº ${g('ctda_cnpj')}, com sede em ${endCtda}${g('ctda_rep') ? ', neste ato representada por seu ' + (g('ctda_rep_cargo')||'representante legal') + ', ' + g('ctda_rep') : ''}.`);
+  body += wParBold('CONTRATADA: ', `${g('ctda_nome')}, ${g('ctda_qual')}, inscrita no CNPJ sob o nº ${g('ctda_cnpj')}, com sede em ${endCtda}${g('ctda_rep') ? ', neste ato representada por seu ' + (g('ctda_rep_cargo')||'representante legal') + ', ' + g('ctda_rep') + (g('ctda_rep_cpf') ? ', portador do CPF nº ' + g('ctda_rep_cpf') : '') : ''}.`);
   body += wLn();
   body += wPar('As partes acima qualificadas celebram o presente Contrato de Prestação de Serviços Técnicos, que se regerá pelas seguintes cláusulas e condições:');
   body += wLn();
