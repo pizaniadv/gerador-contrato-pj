@@ -9,59 +9,100 @@
   /* ── RESET & BASE ── */
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   :root {
-    --azul: #1a3a5c;
-    --azul-claro: #2563a8;
-    --cinza-bg: #f4f6f9;
-    --cinza-borda: #d1d9e0;
-    --cinza-texto: #4a5568;
-    --verde: #16803c;
-    --vermelho: #c0392b;
-    --amarelo-aviso: #fff8e1;
-    --amarelo-borda: #f59e0b;
+    --azul: #1e2d4a;
+    --azul-claro: #2a3f63;
+    --vermelho: #8b2a2a;
+    --vermelho-claro: #a33333;
+    --creme: #f5f0e8;
+    --creme-escuro: #ede6d6;
+    --cinza-bg: #f0ece4;
+    --cinza-borda: #d4cfc5;
+    --cinza-texto: #4a4540;
+    --verde: #2d6a4f;
+    --amarelo-aviso: #fdf6e3;
+    --amarelo-borda: #c9a84c;
     --branco: #ffffff;
-    --sombra: 0 2px 8px rgba(0,0,0,0.08);
+    --sombra: 0 2px 8px rgba(30,45,74,0.10);
   }
-  body { font-family: 'Segoe UI', Arial, sans-serif; background: var(--cinza-bg); color: #2d3748; font-size: 15px; }
+  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600&family=Source+Sans+3:wght@300;400;600&display=swap');
+  body { font-family: 'Source Sans 3', 'Segoe UI', Arial, sans-serif; background: var(--cinza-bg); color: #2d2820; font-size: 15px; }
 
   /* ── TELA DE LOGIN ── */
   #tela-login {
     min-height: 100vh; display: flex; align-items: center; justify-content: center;
-    background: linear-gradient(135deg, #1a3a5c 0%, #2563a8 100%);
+    background: var(--azul);
   }
-  .login-box {
-    background: white; border-radius: 12px; padding: 40px 36px; width: 380px;
-    box-shadow: 0 8px 32px rgba(0,0,0,0.18); text-align: center;
+  .login-outer { display: flex; max-width: 900px; width: 96%; border-radius: 16px; overflow: hidden; box-shadow: 0 16px 48px rgba(0,0,0,0.32); }
+  .login-left {
+    flex: 1; background: var(--creme); padding: 48px 40px; display: flex; flex-direction: column; justify-content: space-between;
+    border-right: 1px solid var(--cinza-borda);
   }
-  .login-box h1 { font-size: 22px; color: var(--azul); margin-bottom: 6px; }
-  .login-box p { font-size: 13px; color: var(--cinza-texto); margin-bottom: 28px; }
-  .login-box input {
-    width: 100%; padding: 11px 14px; border: 1.5px solid var(--cinza-borda);
-    border-radius: 8px; font-size: 15px; margin-bottom: 14px; outline: none;
-    transition: border-color .2s;
+  .login-logo { display: flex; align-items: center; gap: 14px; margin-bottom: 32px; }
+  .login-logo-sigla {
+    width: 52px; height: 52px; border: 2px solid var(--vermelho); border-radius: 4px;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Playfair Display', Georgia, serif; font-size: 20px; color: var(--vermelho); font-weight: 600;
   }
-  .login-box input:focus { border-color: var(--azul-claro); }
-  .login-box button {
-    width: 100%; padding: 12px; background: var(--azul); color: white;
-    border: none; border-radius: 8px; font-size: 15px; font-weight: 600;
-    cursor: pointer; transition: background .2s;
+  .login-logo-nome { font-family: 'Playfair Display', Georgia, serif; }
+  .login-logo-nome strong { display: block; font-size: 17px; color: var(--azul); font-weight: 600; letter-spacing: .02em; }
+  .login-logo-nome span { font-size: 11px; color: var(--vermelho); letter-spacing: .12em; text-transform: uppercase; }
+  .login-apresentacao h2 { font-family: 'Playfair Display', Georgia, serif; font-size: 22px; color: var(--azul); margin-bottom: 14px; font-weight: 600; line-height: 1.3; }
+  .login-apresentacao p { font-size: 13px; color: var(--cinza-texto); line-height: 1.7; margin-bottom: 18px; }
+  .login-features { list-style: none; padding: 0; }
+  .login-features li { font-size: 12px; color: var(--cinza-texto); padding: 5px 0; display: flex; align-items: flex-start; gap: 8px; border-bottom: 1px solid var(--cinza-borda); }
+  .login-features li:last-child { border-bottom: none; }
+  .login-features li::before { content: "▸"; color: var(--vermelho); font-size: 11px; margin-top: 2px; flex-shrink: 0; }
+  .login-aviso { margin-top: 24px; font-size: 11px; color: #999; line-height: 1.5; }
+  .login-right {
+    width: 340px; flex-shrink: 0; background: var(--azul); padding: 48px 36px;
+    display: flex; flex-direction: column; justify-content: center;
   }
-  .login-box button:hover { background: var(--azul-claro); }
-  #login-erro { color: var(--vermelho); font-size: 13px; margin-top: 10px; display: none; }
-  .login-rodape { margin-top: 24px; font-size: 12px; color: #aaa; }
+  .login-right h3 { font-family: 'Playfair Display', Georgia, serif; color: var(--creme); font-size: 20px; margin-bottom: 8px; font-weight: 400; }
+  .login-right p { font-size: 12px; color: rgba(245,240,232,0.6); margin-bottom: 28px; line-height: 1.5; }
+  .login-right input {
+    width: 100%; padding: 12px 14px; border: 1px solid rgba(245,240,232,0.25);
+    border-radius: 8px; font-size: 14px; margin-bottom: 12px; outline: none;
+    background: rgba(255,255,255,0.08); color: var(--creme);
+    transition: border-color .2s; font-family: inherit;
+  }
+  .login-right input::placeholder { color: rgba(245,240,232,0.4); }
+  .login-right input:focus { border-color: var(--vermelho-claro); }
+  .login-right button {
+    width: 100%; padding: 13px; background: var(--vermelho); color: var(--creme);
+    border: none; border-radius: 8px; font-size: 14px; font-weight: 600;
+    cursor: pointer; transition: background .2s; font-family: inherit; letter-spacing: .03em;
+  }
+  .login-right button:hover { background: var(--vermelho-claro); }
+  #login-erro { color: #f4a0a0; font-size: 12px; margin-top: 8px; display: none; }
+  .login-rodape { margin-top: 24px; font-size: 11px; color: rgba(245,240,232,0.35); line-height: 1.5; }
+  @media (max-width: 700px) {
+    .login-outer { flex-direction: column; }
+    .login-left { padding: 32px 24px; }
+    .login-right { width: 100%; padding: 32px 24px; }
+  }
 
   /* ── APP PRINCIPAL ── */
   #app { display: none; min-height: 100vh; }
 
   /* ── HEADER ── */
   .header {
-    background: var(--azul); color: white; padding: 14px 28px;
+    background: var(--azul); color: var(--creme); padding: 12px 28px;
     display: flex; align-items: center; justify-content: space-between;
-    position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 8px rgba(0,0,0,0.20);
+    border-bottom: 2px solid var(--vermelho);
   }
-  .header h1 { font-size: 17px; font-weight: 600; letter-spacing: .02em; }
+  .header-logo { display: flex; align-items: center; gap: 12px; }
+  .header-sigla {
+    width: 34px; height: 34px; border: 1.5px solid var(--vermelho); border-radius: 3px;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Playfair Display', Georgia, serif; font-size: 13px; color: var(--vermelho); font-weight: 600;
+  }
+  .header-nome strong { display: block; font-family: 'Playfair Display', Georgia, serif; font-size: 14px; color: var(--creme); font-weight: 600; }
+  .header-nome span { font-size: 10px; color: rgba(245,240,232,0.5); letter-spacing: .1em; text-transform: uppercase; }
+  .header h1 { font-size: 14px; font-weight: 400; color: rgba(245,240,232,0.7); letter-spacing: .02em; font-family: 'Source Sans 3', sans-serif; }
   .header-right { display: flex; align-items: center; gap: 12px; }
-  .btn-sair { background: rgba(255,255,255,0.15); border: none; color: white; padding: 6px 14px; border-radius: 6px; font-size: 13px; cursor: pointer; }
-  .btn-sair:hover { background: rgba(255,255,255,0.25); }
+  .btn-sair { background: rgba(139,42,42,0.3); border: 1px solid rgba(139,42,42,0.5); color: var(--creme); padding: 6px 14px; border-radius: 6px; font-size: 12px; cursor: pointer; }
+  .btn-sair:hover { background: var(--vermelho); }
 
   /* ── PROGRESSO ── */
   .progresso-wrap { background: white; border-bottom: 1px solid var(--cinza-borda); padding: 16px 28px; }
@@ -81,10 +122,10 @@
     font-size: 13px; font-weight: 600; color: var(--cinza-texto); z-index: 1;
     position: relative; transition: all .2s;
   }
-  .etapa.ativa .etapa-circulo { background: var(--azul); border-color: var(--azul); color: white; }
+  .etapa.ativa .etapa-circulo { background: var(--vermelho); border-color: var(--vermelho); color: var(--creme); }
   .etapa.concluida .etapa-circulo { background: var(--verde); border-color: var(--verde); color: white; }
   .etapa-label { font-size: 11px; color: var(--cinza-texto); margin-top: 6px; text-align: center; }
-  .etapa.ativa .etapa-label { color: var(--azul); font-weight: 600; }
+  .etapa.ativa .etapa-label { color: var(--vermelho); font-weight: 600; }
 
   /* ── CONTEÚDO PRINCIPAL ── */
   .main { max-width: 820px; margin: 0 auto; padding: 28px 20px; }
@@ -102,7 +143,7 @@
     background: white; border-radius: 12px; padding: 28px 32px;
     box-shadow: var(--sombra); margin-bottom: 20px;
   }
-  .card-etapa h2 { font-size: 17px; color: var(--azul); margin-bottom: 6px; font-weight: 600; }
+  .card-etapa h2 { font-size: 17px; color: var(--azul); margin-bottom: 6px; font-weight: 600; font-family: "Playfair Display", Georgia, serif; }
   .card-etapa .descricao-etapa { font-size: 13px; color: var(--cinza-texto); margin-bottom: 22px; border-bottom: 1px solid var(--cinza-bg); padding-bottom: 14px; }
 
   /* ── CAMPOS ── */
@@ -117,7 +158,7 @@
     border-radius: 8px; font-size: 14px; color: #2d3748; outline: none;
     transition: border-color .2s; font-family: inherit; background: white;
   }
-  .campo-input:focus, .campo-select:focus, .campo-textarea:focus { border-color: var(--azul-claro); box-shadow: 0 0 0 3px rgba(37,99,168,0.1); }
+  .campo-input:focus, .campo-select:focus, .campo-textarea:focus { border-color: var(--vermelho); box-shadow: 0 0 0 3px rgba(139,42,42,0.1); }
   .campo-input.erro, .campo-select.erro, .campo-textarea.erro { border-color: var(--vermelho); }
   .campo-textarea { resize: vertical; min-height: 80px; }
   .campo-erro-msg { font-size: 12px; color: var(--vermelho); margin-top: 4px; display: none; }
@@ -171,10 +212,10 @@
   }
   .btn-voltar:hover { border-color: var(--azul); color: var(--azul); }
   .btn-avancar {
-    padding: 11px 28px; background: var(--azul); border: none; border-radius: 8px;
-    color: white; font-size: 14px; font-weight: 600; cursor: pointer; transition: background .2s;
+    padding: 11px 28px; background: var(--vermelho); border: none; border-radius: 8px;
+    color: var(--creme); font-size: 14px; font-weight: 600; cursor: pointer; transition: background .2s; font-family: inherit;
   }
-  .btn-avancar:hover { background: var(--azul-claro); }
+  .btn-avancar:hover { background: var(--vermelho-claro); }
 
   /* ── ETAPA FINAL: EXPORTAR ── */
   .resumo-contrato {
@@ -189,8 +230,8 @@
     border: none; border-radius: 10px; cursor: pointer; transition: all .2s; margin-bottom: 10px;
     display: flex; align-items: center; justify-content: center; gap: 10px;
   }
-  .btn-docx { background: #1b5e9c; color: white; }
-  .btn-docx:hover { background: #154f87; }
+  .btn-docx { background: var(--azul); color: var(--creme); }
+  .btn-docx:hover { background: var(--azul-claro); }
   .btn-pdf { background: #c0392b; color: white; }
   .btn-pdf:hover { background: #a93226; }
 
@@ -208,7 +249,7 @@
   .modal-box h3 { color: var(--azul); font-size: 18px; margin-bottom: 16px; }
   .modal-box p { font-size: 14px; line-height: 1.7; color: #2d3748; margin-bottom: 12px; }
   .modal-btns { display: flex; gap: 12px; margin-top: 22px; }
-  .btn-confirmar { flex: 1; padding: 11px; background: var(--azul); color: white; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; }
+  .btn-confirmar { flex: 1; padding: 11px; background: var(--vermelho); color: var(--creme); border: none; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; font-family: inherit; }
   .btn-cancelar { flex: 1; padding: 11px; background: white; color: var(--cinza-texto); border: 1.5px solid var(--cinza-borda); border-radius: 8px; font-size: 14px; cursor: pointer; }
 
   /* ── HISTÓRICO ── */
@@ -227,11 +268,11 @@
   .lookup-row { display: flex; gap: 10px; }
   .lookup-row .campo-input { flex: 1; }
   .btn-lookup {
-    padding: 10px 16px; background: var(--azul-claro); color: white; border: none;
+    padding: 10px 16px; background: var(--azul); color: var(--creme); border: none;
     border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; white-space: nowrap;
-    transition: background .2s;
+    transition: background .2s; font-family: inherit;
   }
-  .btn-lookup:hover { background: var(--azul); }
+  .btn-lookup:hover { background: var(--azul-claro); }
   .lookup-status { font-size: 12px; margin-top: 4px; }
   .lookup-status.ok { color: var(--verde); }
   .lookup-status.erro { color: var(--vermelho); }
@@ -246,7 +287,7 @@
   }
 
   .tag-opcional { font-size: 11px; color: #888; font-weight: 400; margin-left: 6px; }
-  .secao-titulo { font-size: 13px; font-weight: 700; color: var(--azul); margin: 18px 0 10px; text-transform: uppercase; letter-spacing: .04em; border-left: 3px solid var(--azul-claro); padding-left: 10px; }
+  .secao-titulo { font-size: 13px; font-weight: 700; color: var(--azul); margin: 18px 0 10px; text-transform: uppercase; letter-spacing: .04em; border-left: 3px solid var(--vermelho); padding-left: 10px; }
 </style>
 </head>
 <body>
@@ -255,13 +296,42 @@
      TELA DE LOGIN
 ══════════════════════════════════════ -->
 <div id="tela-login">
-  <div class="login-box">
-    <h1>⚖️ Gerador de Contrato PJ</h1>
-    <p>Ferramenta para geração de contratos de prestação de serviços técnicos</p>
-    <input type="password" id="campo-senha" placeholder="Digite a senha de acesso" onkeydown="if(event.key==='Enter')fazerLogin()">
-    <button onclick="fazerLogin()">Acessar</button>
-    <div id="login-erro">Senha incorreta. Tente novamente.</div>
-    <div class="login-rodape">Documento gerado é de responsabilidade da empresa preenchente.<br>Dúvidas: consulte o advogado responsável.</div>
+  <div class="login-outer">
+    <div class="login-left">
+      <div>
+        <div class="login-logo">
+          <div class="login-logo-sigla">RP</div>
+          <div class="login-logo-nome">
+            <strong>Raphael Pizani</strong>
+            <span>Advocacia</span>
+          </div>
+        </div>
+        <div class="login-apresentacao">
+          <h2>Gerador de Contratos PJ — Projeto Piloto</h2>
+          <p>Esta ferramenta foi desenvolvida pelo escritório <strong>Raphael Pizani Advocacia</strong> para automatizar a geração de contratos de prestação de serviços técnicos com segurança jurídica e eficiência operacional.</p>
+          <p>O modelo contratual embutido neste sistema foi construído com base em jurisprudência consolidada do STF e STJ, incorporando as mais robustas proteções contra reconhecimento de vínculo empregatício disponíveis no ordenamento jurídico brasileiro.</p>
+          <ul class="login-features">
+            <li>Geração automática de contrato PJ com 14 cláusulas de proteção</li>
+            <li>Busca automática de CNPJ (Receita Federal) e CEP (Correios)</li>
+            <li>Blocos opcionais: remuneração variável, visitas presenciais, habilitação profissional e subcontratação</li>
+            <li>Exportação em Word (.docx) e PDF com logo da empresa</li>
+            <li>Histórico de contratos gerados salvo localmente</li>
+            <li>Todo documento gerado deve ser validado pelo advogado responsável antes da assinatura</li>
+          </ul>
+        </div>
+      </div>
+      <div class="login-aviso">
+        Este sistema está em fase piloto. O preenchimento correto dos dados é de responsabilidade exclusiva da empresa usuária. O escritório Raphael Pizani Advocacia não responde por erros decorrentes de informações incorretas inseridas neste formulário.
+      </div>
+    </div>
+    <div class="login-right">
+      <h3>Acesso restrito</h3>
+      <p>Este sistema é de uso exclusivo de empresas clientes autorizadas pelo escritório Raphael Pizani Advocacia.</p>
+      <input type="password" id="campo-senha" placeholder="Digite a senha de acesso" onkeydown="if(event.key==='Enter')fazerLogin()">
+      <button onclick="fazerLogin()">Acessar</button>
+      <div id="login-erro">Senha incorreta. Tente novamente.</div>
+      <div class="login-rodape">Dúvidas: raphaelpizani@gmail.com<br>(71) 98168-4013</div>
+    </div>
   </div>
 </div>
 
@@ -270,9 +340,15 @@
 ══════════════════════════════════════ -->
 <div id="app">
   <div class="header">
-    <h1>⚖️ Gerador de Contrato PJ</h1>
+    <div class="header-logo">
+      <div class="header-sigla">RP</div>
+      <div class="header-nome">
+        <strong>Raphael Pizani Advocacia</strong>
+        <span>Gerador de Contratos PJ</span>
+      </div>
+    </div>
     <div class="header-right">
-      <span id="etapa-label-header" style="font-size:13px;opacity:.8"></span>
+      <span id="etapa-label-header" style="font-size:12px;opacity:.6;color:var(--creme)"></span>
       <button class="btn-sair" onclick="sair()">Sair</button>
     </div>
   </div>
@@ -394,6 +470,24 @@
       <div class="campo-grupo">
         <div class="campo-label">Complemento <span class="tag-opcional">(opcional)</span></div>
         <input class="campo-input" id="cont_comp" placeholder="Sala, andar, bloco etc.">
+      </div>
+
+      <div class="secao-titulo">Logo da Empresa <span style="font-weight:400;text-transform:none;letter-spacing:0;font-size:12px;color:#999">(opcional)</span></div>
+      <div class="campo-grupo">
+        <div class="campo-label">Logotipo da Contratante
+          <div class="tooltip-wrap"><button class="tooltip-btn">?</button><div class="tooltip-box">Faça upload da logo da empresa para que ela apareça no documento gerado. Formatos aceitos: JPG, PNG, GIF. Recomendado: fundo transparente (PNG).</div></div>
+        </div>
+        <input type="file" id="logo_upload" accept="image/*" onchange="previewLogo(this)" style="font-size:13px;padding:8px;border:1.5px dashed var(--cinza-borda);border-radius:8px;width:100%;background:var(--creme);cursor:pointer;">
+        <div id="logo-preview-wrap" style="display:none;margin-top:10px;padding:12px;background:var(--creme-escuro);border-radius:8px;border:1px solid var(--cinza-borda);">
+          <img id="logo-preview" style="max-height:80px;max-width:240px;object-fit:contain;display:block;margin-bottom:10px;">
+          <div class="campo-label" style="margin-bottom:6px;">Posição da logo no documento:</div>
+          <div style="display:flex;gap:12px;flex-wrap:wrap;">
+            <label style="font-size:13px;display:flex;align-items:center;gap:5px;cursor:pointer;"><input type="radio" name="logo_pos" value="cabecalho" checked> Cabeçalho (todas as páginas)</label>
+            <label style="font-size:13px;display:flex;align-items:center;gap:5px;cursor:pointer;"><input type="radio" name="logo_pos" value="primeira"> Primeira página (acima do título)</label>
+            <label style="font-size:13px;display:flex;align-items:center;gap:5px;cursor:pointer;"><input type="radio" name="logo_pos" value="ambos"> Ambos</label>
+          </div>
+          <button onclick="removerLogo()" style="margin-top:10px;font-size:12px;padding:4px 12px;border:1px solid var(--cinza-borda);border-radius:6px;background:white;cursor:pointer;">✕ Remover logo</button>
+        </div>
       </div>
 
       <div class="nav-btns">
@@ -787,6 +881,39 @@ const SENHA_ACESSO = "contrato2025";
 let etapaAtual = 1;
 let acaoModal = null;
 
+// ── LOGO ──
+let logoBase64 = null;
+let logoMimeType = 'image/png';
+
+function previewLogo(input) {
+  const file = input.files[0];
+  if (!file) return;
+  logoMimeType = file.type || 'image/png';
+  const reader = new FileReader();
+  reader.onload = e => {
+    logoBase64 = e.target.result.split(',')[1];
+    document.getElementById('logo-preview').src = e.target.result;
+    document.getElementById('logo-preview-wrap').style.display = 'block';
+  };
+  reader.readAsDataURL(file);
+}
+
+function removerLogo() {
+  logoBase64 = null;
+  document.getElementById('logo_upload').value = '';
+  document.getElementById('logo-preview-wrap').style.display = 'none';
+}
+
+function getPosLogo() {
+  const r = document.querySelector('input[name="logo_pos"]:checked');
+  return r ? r.value : 'primeira';
+}
+
+function logoImgTag() {
+  if (!logoBase64) return '';
+  return `<div style="text-align:center;margin-bottom:16pt"><img src="data:${logoMimeType};base64,${logoBase64}" style="max-height:80px;max-width:220px;object-fit:contain"></div>`;
+}
+
 // ── LOGIN ──
 function fazerLogin() {
   const s = document.getElementById('campo-senha').value;
@@ -1126,6 +1253,8 @@ function exportarPDF() {
   .ass-linha { border-top: 1px solid #000; padding-top: 4pt; margin-top: 30pt; font-size: 11pt; }
   .testemunhas { margin-top: 30pt; }
   @media print { body { margin: 0; } }
+  .logo-cabecalho { text-align: center; margin-bottom: 12pt; }
+  .logo-cabecalho img { max-height: 60px; max-width: 180px; object-fit: contain; }
 </style>
 </head><body>${html}<script>window.onload=function(){window.print();}<\/script></body></html>`);
   win.document.close();
@@ -1148,7 +1277,9 @@ function gerarHTMLContrato() {
     return `<div class="cl-titulo">CLÁUSULA ${romano} — ${titulo}</div>` + itens.map(t=>`<p class="cl-item">${t}</p>`).join('');
   };
 
-  let html = `<h1>CONTRATO DE PRESTAÇÃO DE SERVIÇOS TÉCNICOS</h1>
+  const pos = getPosLogo();
+  const logoHtml = logoImgTag();
+  let html = `${(logoBase64 && (pos==='primeira'||pos==='ambos')) ? logoHtml : ''}<h1>CONTRATO DE PRESTAÇÃO DE SERVIÇOS TÉCNICOS</h1>
 <div class="partes">
 <p><strong>CONTRATANTE:</strong> ${g('cont_nome')}, pessoa jurídica de direito privado, inscrita no CNPJ sob o nº ${g('cont_cnpj')}, com sede em ${endCont}, neste ato representada por seu ${g('cont_rep_cargo')}, ${g('cont_rep')}, portador do CPF nº ${g('cont_rep_cpf')}.</p>
 <br>
@@ -1295,6 +1426,15 @@ async function exportarDocx() {
   function cl(titulo) { return wCl(`CLÁUSULA ${romano[n++-1]||n} — ${titulo}`); }
 
   let body = '';
+  // Logo no DOCX
+  if (logoBase64) {
+    const pos = getPosLogo();
+    if (pos === 'primeira' || pos === 'ambos') {
+      const ext = logoMimeType.includes('png') ? 'png' : logoMimeType.includes('gif') ? 'gif' : 'jpeg';
+      const relId = 'rId10';
+      body = `__LOGO_REL_ID__${relId}__LOGO_EXT__${ext}__LOGO_DATA__${logoBase64}__LOGO_END__` + body;
+    }
+  }
   body += wTit('CONTRATO DE PRESTAÇÃO DE SERVIÇOS TÉCNICOS');
   body += wLn();
   body += wParBold('CONTRATANTE: ', `${g('cont_nome')}, pessoa jurídica de direito privado, inscrita no CNPJ sob o nº ${g('cont_cnpj')}, com sede em ${endCont}, neste ato representada por seu ${g('cont_rep_cargo')}, ${g('cont_rep')}, portador do CPF nº ${g('cont_rep_cpf')}.`);
@@ -1470,11 +1610,38 @@ ${body}
   // Usar JSZip via CDN (carregado inline só aqui via importação dinâmica)
   // Como não temos JSZip, vamos usar uma implementação mínima de ZIP em JS puro
   const zip = criarZip();
-  zip.add('[Content_Types].xml', contentTypes);
+  // Handle logo image in DOCX
+  let finalDocXml = docXml;
+  let finalRels = relsXml;
+  let finalContentTypes = contentTypes;
+  const logoMatch = body.match(/__LOGO_REL_ID__(rId\d+)__LOGO_EXT__(\w+)__LOGO_DATA__([A-Za-z0-9+/=]+)__LOGO_END__/);
+  if (logoMatch) {
+    const [, relId, ext, b64] = logoMatch;
+    const mimeMap = {png:'image/png', jpeg:'image/jpeg', gif:'image/gif'};
+    const mime = mimeMap[ext] || 'image/png';
+    // Add image relationship
+    finalRels = finalRels.replace('</Relationships>',
+      `  <Relationship Id="${relId}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/image" Target="media/logo.${ext}"/>
+</Relationships>`);
+    // Add content type
+    finalContentTypes = finalContentTypes.replace('</Types>',
+      `  <Override PartName="/word/media/logo.${ext}" ContentType="${mime}"/>
+</Types>`);
+    // Add logo image XML before title — simple inline image
+    const logoXml = `<w:p><w:pPr><w:jc w:val="center"/><w:spacing w:before="0" w:after="120"/></w:pPr><w:r><w:rPr/><w:drawing><wp:inline distT="0" distB="0" distL="0" distR="0"><wp:extent cx="1800000" cy="630000"/><wp:docPr id="1" name="logo"/><a:graphic xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main"><a:graphicData uri="http://schemas.openxmlformats.org/drawingml/2006/picture"><pic:pic xmlns:pic="http://schemas.openxmlformats.org/drawingml/2006/picture"><pic:nvPicPr><pic:cNvPr id="1" name="logo"/><pic:cNvPicPr/></pic:nvPicPr><pic:blipFill><a:blip r:embed="${relId}" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"/><a:stretch><a:fillRect/></a:stretch></pic:blipFill><pic:spPr><a:xfrm><a:off x="0" y="0"/><a:ext cx="1800000" cy="630000"/></a:xfrm><a:prstGeom prst="rect"><a:avLst/></a:prstGeom></pic:spPr></pic:pic></a:graphicData></a:graphic></wp:inline></w:drawing></w:r></w:p>`;
+    finalDocXml = finalDocXml.replace(/<w:sectPr>/, logoXml + '<w:sectPr>');
+    // Convert base64 to Uint8Array for the image file
+    const binStr = atob(b64);
+    const bytes = new Uint8Array(binStr.length);
+    for (let i = 0; i < binStr.length; i++) bytes[i] = binStr.charCodeAt(i);
+    zip.addBinary(`word/media/logo.${ext}`, bytes);
+  }
+
+  zip.add('[Content_Types].xml', finalContentTypes);
   zip.add('_rels/.rels', rootRels);
-  zip.add('word/document.xml', docXml);
+  zip.add('word/document.xml', finalDocXml);
   zip.add('word/styles.xml', stylesXml);
-  zip.add('word/_rels/document.xml.rels', relsXml);
+  zip.add('word/_rels/document.xml.rels', finalRels);
   zip.add('docProps/app.xml', appXml);
 
   const blob = zip.toBlob();
@@ -1509,7 +1676,8 @@ function criarZip() {
     return r;
   }
   return {
-    add(name,content){files.push({name,content});},
+    add(name,content){files.push({name,content,binary:false});},
+    addBinary(name,bytes){files.push({name,content:bytes,binary:true});},
     toBlob(){
       const enc=new TextEncoder();
       const localHeaders=[];
@@ -1517,7 +1685,7 @@ function criarZip() {
       let offset=0;
       for(const f of files){
         const nameB=enc.encode(f.name);
-        const dataB=enc.encode(f.content);
+        const dataB = f.binary ? f.content : enc.encode(f.content);
         const crc=crc32(dataB);
         const lh=concat(
           new Uint8Array([0x50,0x4B,0x03,0x04]),
