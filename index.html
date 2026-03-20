@@ -1,0 +1,1572 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gerador de Contrato PJ</title>
+<!-- docx gerado via XML puro, sem dependência externa -->
+<style>
+  /* ── RESET & BASE ── */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --azul: #1a3a5c;
+    --azul-claro: #2563a8;
+    --cinza-bg: #f4f6f9;
+    --cinza-borda: #d1d9e0;
+    --cinza-texto: #4a5568;
+    --verde: #16803c;
+    --vermelho: #c0392b;
+    --amarelo-aviso: #fff8e1;
+    --amarelo-borda: #f59e0b;
+    --branco: #ffffff;
+    --sombra: 0 2px 8px rgba(0,0,0,0.08);
+  }
+  body { font-family: 'Segoe UI', Arial, sans-serif; background: var(--cinza-bg); color: #2d3748; font-size: 15px; }
+
+  /* ── TELA DE LOGIN ── */
+  #tela-login {
+    min-height: 100vh; display: flex; align-items: center; justify-content: center;
+    background: linear-gradient(135deg, #1a3a5c 0%, #2563a8 100%);
+  }
+  .login-box {
+    background: white; border-radius: 12px; padding: 40px 36px; width: 380px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.18); text-align: center;
+  }
+  .login-box h1 { font-size: 22px; color: var(--azul); margin-bottom: 6px; }
+  .login-box p { font-size: 13px; color: var(--cinza-texto); margin-bottom: 28px; }
+  .login-box input {
+    width: 100%; padding: 11px 14px; border: 1.5px solid var(--cinza-borda);
+    border-radius: 8px; font-size: 15px; margin-bottom: 14px; outline: none;
+    transition: border-color .2s;
+  }
+  .login-box input:focus { border-color: var(--azul-claro); }
+  .login-box button {
+    width: 100%; padding: 12px; background: var(--azul); color: white;
+    border: none; border-radius: 8px; font-size: 15px; font-weight: 600;
+    cursor: pointer; transition: background .2s;
+  }
+  .login-box button:hover { background: var(--azul-claro); }
+  #login-erro { color: var(--vermelho); font-size: 13px; margin-top: 10px; display: none; }
+  .login-rodape { margin-top: 24px; font-size: 12px; color: #aaa; }
+
+  /* ── APP PRINCIPAL ── */
+  #app { display: none; min-height: 100vh; }
+
+  /* ── HEADER ── */
+  .header {
+    background: var(--azul); color: white; padding: 14px 28px;
+    display: flex; align-items: center; justify-content: space-between;
+    position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  }
+  .header h1 { font-size: 17px; font-weight: 600; letter-spacing: .02em; }
+  .header-right { display: flex; align-items: center; gap: 12px; }
+  .btn-sair { background: rgba(255,255,255,0.15); border: none; color: white; padding: 6px 14px; border-radius: 6px; font-size: 13px; cursor: pointer; }
+  .btn-sair:hover { background: rgba(255,255,255,0.25); }
+
+  /* ── PROGRESSO ── */
+  .progresso-wrap { background: white; border-bottom: 1px solid var(--cinza-borda); padding: 16px 28px; }
+  .progresso-etapas { display: flex; gap: 0; max-width: 800px; margin: 0 auto; }
+  .etapa {
+    flex: 1; display: flex; flex-direction: column; align-items: center;
+    position: relative; cursor: pointer;
+  }
+  .etapa::after {
+    content: ''; position: absolute; top: 17px; left: 50%; width: 100%;
+    height: 2px; background: var(--cinza-borda); z-index: 0;
+  }
+  .etapa:last-child::after { display: none; }
+  .etapa-circulo {
+    width: 34px; height: 34px; border-radius: 50%; border: 2px solid var(--cinza-borda);
+    background: white; display: flex; align-items: center; justify-content: center;
+    font-size: 13px; font-weight: 600; color: var(--cinza-texto); z-index: 1;
+    position: relative; transition: all .2s;
+  }
+  .etapa.ativa .etapa-circulo { background: var(--azul); border-color: var(--azul); color: white; }
+  .etapa.concluida .etapa-circulo { background: var(--verde); border-color: var(--verde); color: white; }
+  .etapa-label { font-size: 11px; color: var(--cinza-texto); margin-top: 6px; text-align: center; }
+  .etapa.ativa .etapa-label { color: var(--azul); font-weight: 600; }
+
+  /* ── CONTEÚDO PRINCIPAL ── */
+  .main { max-width: 820px; margin: 0 auto; padding: 28px 20px; }
+
+  /* ── AVISO ISENÇÃO ── */
+  .aviso-isencao {
+    background: var(--amarelo-aviso); border: 1.5px solid var(--amarelo-borda);
+    border-radius: 10px; padding: 16px 20px; margin-bottom: 24px;
+    font-size: 13px; line-height: 1.6; color: #7c4f00;
+  }
+  .aviso-isencao strong { display: block; margin-bottom: 4px; font-size: 14px; }
+
+  /* ── CARD DE ETAPA ── */
+  .card-etapa {
+    background: white; border-radius: 12px; padding: 28px 32px;
+    box-shadow: var(--sombra); margin-bottom: 20px;
+  }
+  .card-etapa h2 { font-size: 17px; color: var(--azul); margin-bottom: 6px; font-weight: 600; }
+  .card-etapa .descricao-etapa { font-size: 13px; color: var(--cinza-texto); margin-bottom: 22px; border-bottom: 1px solid var(--cinza-bg); padding-bottom: 14px; }
+
+  /* ── CAMPOS ── */
+  .campo-grupo { margin-bottom: 18px; }
+  .campo-label {
+    display: flex; align-items: center; gap: 6px;
+    font-size: 13px; font-weight: 600; color: #2d3748; margin-bottom: 6px;
+  }
+  .campo-label .obrig { color: var(--vermelho); }
+  .campo-input, .campo-select, .campo-textarea {
+    width: 100%; padding: 10px 13px; border: 1.5px solid var(--cinza-borda);
+    border-radius: 8px; font-size: 14px; color: #2d3748; outline: none;
+    transition: border-color .2s; font-family: inherit; background: white;
+  }
+  .campo-input:focus, .campo-select:focus, .campo-textarea:focus { border-color: var(--azul-claro); box-shadow: 0 0 0 3px rgba(37,99,168,0.1); }
+  .campo-input.erro, .campo-select.erro, .campo-textarea.erro { border-color: var(--vermelho); }
+  .campo-textarea { resize: vertical; min-height: 80px; }
+  .campo-erro-msg { font-size: 12px; color: var(--vermelho); margin-top: 4px; display: none; }
+  .campo-hint { font-size: 12px; color: var(--cinza-texto); margin-top: 4px; }
+  .row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
+
+  /* ── TOOLTIP ── */
+  .tooltip-wrap { position: relative; display: inline-block; }
+  .tooltip-btn {
+    width: 18px; height: 18px; border-radius: 50%; background: var(--azul-claro);
+    color: white; font-size: 11px; font-weight: 700; border: none; cursor: pointer;
+    display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0;
+  }
+  .tooltip-box {
+    position: absolute; left: 24px; top: -6px; width: 260px; background: #1a3a5c;
+    color: white; font-size: 12px; line-height: 1.5; padding: 10px 13px;
+    border-radius: 8px; z-index: 200; display: none; box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+  }
+  .tooltip-wrap:hover .tooltip-box, .tooltip-btn:focus + .tooltip-box { display: block; }
+
+  /* ── TOGGLE BLOCO OPCIONAL ── */
+  .bloco-opcional {
+    border: 1.5px dashed var(--cinza-borda); border-radius: 10px; padding: 16px 20px; margin-bottom: 16px;
+  }
+  .bloco-header { display: flex; align-items: center; justify-content: space-between; cursor: pointer; }
+  .bloco-titulo { font-size: 14px; font-weight: 600; color: var(--azul); }
+  .bloco-subtitulo { font-size: 12px; color: var(--cinza-texto); margin-top: 2px; }
+  .bloco-badge { font-size: 11px; background: #e8f0fe; color: var(--azul-claro); padding: 2px 10px; border-radius: 10px; font-weight: 600; }
+  .switch { position: relative; width: 42px; height: 24px; flex-shrink: 0; }
+  .switch input { opacity: 0; width: 0; height: 0; }
+  .switch-slider {
+    position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0;
+    background: #ccc; border-radius: 24px; transition: .3s;
+  }
+  .switch-slider::before {
+    content: ''; position: absolute; height: 18px; width: 18px; left: 3px; bottom: 3px;
+    background: white; border-radius: 50%; transition: .3s;
+  }
+  .switch input:checked + .switch-slider { background: var(--azul-claro); }
+  .switch input:checked + .switch-slider::before { transform: translateX(18px); }
+  .bloco-conteudo { margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--cinza-bg); display: none; }
+  .bloco-conteudo.aberto { display: block; }
+
+  /* ── BOTÕES DE NAVEGAÇÃO ── */
+  .nav-btns { display: flex; justify-content: space-between; margin-top: 24px; }
+  .btn-voltar {
+    padding: 11px 24px; border: 1.5px solid var(--cinza-borda); border-radius: 8px;
+    background: white; color: var(--cinza-texto); font-size: 14px; font-weight: 600;
+    cursor: pointer; transition: all .2s;
+  }
+  .btn-voltar:hover { border-color: var(--azul); color: var(--azul); }
+  .btn-avancar {
+    padding: 11px 28px; background: var(--azul); border: none; border-radius: 8px;
+    color: white; font-size: 14px; font-weight: 600; cursor: pointer; transition: background .2s;
+  }
+  .btn-avancar:hover { background: var(--azul-claro); }
+
+  /* ── ETAPA FINAL: EXPORTAR ── */
+  .resumo-contrato {
+    background: var(--cinza-bg); border-radius: 10px; padding: 18px 22px;
+    font-size: 13px; line-height: 1.8; margin-bottom: 20px; color: #2d3748;
+    max-height: 320px; overflow-y: auto; border: 1px solid var(--cinza-borda);
+  }
+  .resumo-item { display: flex; gap: 10px; margin-bottom: 4px; }
+  .resumo-chave { font-weight: 600; color: var(--azul); min-width: 160px; }
+  .btn-exportar {
+    width: 100%; padding: 14px; font-size: 15px; font-weight: 700;
+    border: none; border-radius: 10px; cursor: pointer; transition: all .2s; margin-bottom: 10px;
+    display: flex; align-items: center; justify-content: center; gap: 10px;
+  }
+  .btn-docx { background: #1b5e9c; color: white; }
+  .btn-docx:hover { background: #154f87; }
+  .btn-pdf { background: #c0392b; color: white; }
+  .btn-pdf:hover { background: #a93226; }
+
+  /* ── MODAL DE ISENÇÃO ── */
+  .modal-overlay {
+    position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.55); z-index: 999; display: none;
+    align-items: center; justify-content: center;
+  }
+  .modal-overlay.ativo { display: flex; }
+  .modal-box {
+    background: white; border-radius: 14px; padding: 32px 36px;
+    max-width: 520px; width: 92%; box-shadow: 0 8px 32px rgba(0,0,0,0.22);
+  }
+  .modal-box h3 { color: var(--azul); font-size: 18px; margin-bottom: 16px; }
+  .modal-box p { font-size: 14px; line-height: 1.7; color: #2d3748; margin-bottom: 12px; }
+  .modal-btns { display: flex; gap: 12px; margin-top: 22px; }
+  .btn-confirmar { flex: 1; padding: 11px; background: var(--azul); color: white; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; }
+  .btn-cancelar { flex: 1; padding: 11px; background: white; color: var(--cinza-texto); border: 1.5px solid var(--cinza-borda); border-radius: 8px; font-size: 14px; cursor: pointer; }
+
+  /* ── HISTÓRICO ── */
+  .historico-lista { margin-top: 8px; }
+  .historico-item {
+    background: white; border: 1px solid var(--cinza-borda); border-radius: 8px;
+    padding: 12px 16px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center;
+  }
+  .historico-info { font-size: 13px; }
+  .historico-nome { font-weight: 600; color: var(--azul); }
+  .historico-data { color: var(--cinza-texto); font-size: 12px; }
+  .btn-mini { font-size: 12px; padding: 5px 12px; border: 1px solid var(--cinza-borda); border-radius: 6px; background: white; cursor: pointer; }
+  .btn-mini:hover { background: var(--cinza-bg); }
+
+  /* ── LOOKUP CNPJ/CEP ── */
+  .lookup-row { display: flex; gap: 10px; }
+  .lookup-row .campo-input { flex: 1; }
+  .btn-lookup {
+    padding: 10px 16px; background: var(--azul-claro); color: white; border: none;
+    border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; white-space: nowrap;
+    transition: background .2s;
+  }
+  .btn-lookup:hover { background: var(--azul); }
+  .lookup-status { font-size: 12px; margin-top: 4px; }
+  .lookup-status.ok { color: var(--verde); }
+  .lookup-status.erro { color: var(--vermelho); }
+
+  /* ── RESPONSIVO ── */
+  @media (max-width: 600px) {
+    .row-2, .row-3 { grid-template-columns: 1fr; }
+    .card-etapa { padding: 20px 16px; }
+    .main { padding: 16px 10px; }
+    .progresso-etapas { gap: 0; }
+    .etapa-label { font-size: 9px; }
+  }
+
+  .tag-opcional { font-size: 11px; color: #888; font-weight: 400; margin-left: 6px; }
+  .secao-titulo { font-size: 13px; font-weight: 700; color: var(--azul); margin: 18px 0 10px; text-transform: uppercase; letter-spacing: .04em; border-left: 3px solid var(--azul-claro); padding-left: 10px; }
+</style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════
+     TELA DE LOGIN
+══════════════════════════════════════ -->
+<div id="tela-login">
+  <div class="login-box">
+    <h1>⚖️ Gerador de Contrato PJ</h1>
+    <p>Ferramenta para geração de contratos de prestação de serviços técnicos</p>
+    <input type="password" id="campo-senha" placeholder="Digite a senha de acesso" onkeydown="if(event.key==='Enter')fazerLogin()">
+    <button onclick="fazerLogin()">Acessar</button>
+    <div id="login-erro">Senha incorreta. Tente novamente.</div>
+    <div class="login-rodape">Documento gerado é de responsabilidade da empresa preenchente.<br>Dúvidas: consulte o advogado responsável.</div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     APLICATIVO PRINCIPAL
+══════════════════════════════════════ -->
+<div id="app">
+  <div class="header">
+    <h1>⚖️ Gerador de Contrato PJ</h1>
+    <div class="header-right">
+      <span id="etapa-label-header" style="font-size:13px;opacity:.8"></span>
+      <button class="btn-sair" onclick="sair()">Sair</button>
+    </div>
+  </div>
+
+  <!-- Barra de progresso -->
+  <div class="progresso-wrap">
+    <div class="progresso-etapas" id="progresso">
+      <div class="etapa ativa" onclick="irParaEtapa(1)">
+        <div class="etapa-circulo" id="circ-1">1</div>
+        <div class="etapa-label">Contratante</div>
+      </div>
+      <div class="etapa" onclick="irParaEtapa(2)">
+        <div class="etapa-circulo" id="circ-2">2</div>
+        <div class="etapa-label">Contratada</div>
+      </div>
+      <div class="etapa" onclick="irParaEtapa(3)">
+        <div class="etapa-circulo" id="circ-3">3</div>
+        <div class="etapa-label">Objeto</div>
+      </div>
+      <div class="etapa" onclick="irParaEtapa(4)">
+        <div class="etapa-circulo" id="circ-4">4</div>
+        <div class="etapa-label">Remuneração</div>
+      </div>
+      <div class="etapa" onclick="irParaEtapa(5)">
+        <div class="etapa-circulo" id="circ-5">5</div>
+        <div class="etapa-label">Cláusulas</div>
+      </div>
+      <div class="etapa" onclick="irParaEtapa(6)">
+        <div class="etapa-circulo" id="circ-6">6</div>
+        <div class="etapa-label">Exportar</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="main">
+
+    <!-- ── ETAPA 1: CONTRATANTE ── -->
+    <div id="etapa-1" class="card-etapa">
+      <h2>Passo 1 — Dados da Empresa Contratante</h2>
+      <p class="descricao-etapa">Preencha os dados da sua empresa. Essas informações identificam quem está contratando o serviço.</p>
+
+      <div class="campo-grupo">
+        <div class="campo-label">
+          CNPJ da Empresa <span class="obrig">*</span>
+          <div class="tooltip-wrap"><button class="tooltip-btn">?</button><div class="tooltip-box">Digite apenas os números ou com pontuação. Ao clicar em "Buscar", o sistema preenche automaticamente o nome e endereço da empresa via Receita Federal.</div></div>
+        </div>
+        <div class="lookup-row">
+          <input class="campo-input" id="cont_cnpj" placeholder="00.000.000/0001-00" maxlength="18" oninput="mascararCNPJ(this)">
+          <button class="btn-lookup" onclick="buscarCNPJ()">🔍 Buscar</button>
+        </div>
+        <div class="lookup-status" id="status-cnpj"></div>
+      </div>
+
+      <div class="campo-grupo">
+        <div class="campo-label">Razão Social <span class="obrig">*</span>
+          <div class="tooltip-wrap"><button class="tooltip-btn">?</button><div class="tooltip-box">Nome oficial da empresa conforme registrado na Receita Federal. Preenchido automaticamente após buscar pelo CNPJ.</div></div>
+        </div>
+        <input class="campo-input" id="cont_nome" placeholder="Ex.: Albatroz Serviços Alimentícios Ltda">
+      </div>
+
+      <div class="row-2">
+        <div class="campo-grupo">
+          <div class="campo-label">Nome do Representante Legal <span class="obrig">*</span>
+            <div class="tooltip-wrap"><button class="tooltip-btn">?</button><div class="tooltip-box">Nome completo da pessoa autorizada a assinar contratos pela empresa. Geralmente é o sócio-administrador ou diretor. Consulte o contrato social se tiver dúvida.</div></div>
+          </div>
+          <input class="campo-input" id="cont_rep" placeholder="Nome completo">
+        </div>
+        <div class="campo-grupo">
+          <div class="campo-label">CPF do Representante <span class="obrig">*</span>
+            <div class="tooltip-wrap"><button class="tooltip-btn">?</button><div class="tooltip-box">CPF da pessoa que vai assinar o contrato pela empresa.</div></div>
+          </div>
+          <input class="campo-input" id="cont_rep_cpf" placeholder="000.000.000-00" maxlength="14" oninput="mascararCPF(this)">
+        </div>
+      </div>
+
+      <div class="campo-grupo">
+        <div class="campo-label">Cargo do Representante <span class="obrig">*</span>
+          <div class="tooltip-wrap"><button class="tooltip-btn">?</button><div class="tooltip-box">Cargo oficial dentro da empresa. Exemplos: Administrador, Diretor, Sócio-Gerente. Use exatamente como consta no contrato social.</div></div>
+        </div>
+        <input class="campo-input" id="cont_rep_cargo" placeholder="Ex.: Administrador, Diretor Executivo">
+      </div>
+
+      <div class="secao-titulo">Endereço da Empresa</div>
+
+      <div class="campo-grupo">
+        <div class="campo-label">CEP <span class="obrig">*</span>
+          <div class="tooltip-wrap"><button class="tooltip-btn">?</button><div class="tooltip-box">Digite o CEP e clique em "Buscar". O sistema preenche rua, bairro e cidade automaticamente.</div></div>
+        </div>
+        <div class="lookup-row">
+          <input class="campo-input" id="cont_cep" placeholder="00000-000" maxlength="9" oninput="mascararCEP(this)">
+          <button class="btn-lookup" onclick="buscarCEP('cont')">🔍 Buscar</button>
+        </div>
+        <div class="lookup-status" id="status-cep-cont"></div>
+      </div>
+      <div class="row-2">
+        <div class="campo-grupo">
+          <div class="campo-label">Logradouro <span class="obrig">*</span></div>
+          <input class="campo-input" id="cont_rua" placeholder="Rua / Avenida / Alameda">
+        </div>
+        <div class="campo-grupo">
+          <div class="campo-label">Número <span class="obrig">*</span></div>
+          <input class="campo-input" id="cont_num" placeholder="Ex.: 74">
+        </div>
+      </div>
+      <div class="row-3">
+        <div class="campo-grupo">
+          <div class="campo-label">Bairro</div>
+          <input class="campo-input" id="cont_bairro" placeholder="Bairro">
+        </div>
+        <div class="campo-grupo">
+          <div class="campo-label">Município <span class="obrig">*</span></div>
+          <input class="campo-input" id="cont_cidade" placeholder="Cidade">
+        </div>
+        <div class="campo-grupo">
+          <div class="campo-label">UF <span class="obrig">*</span></div>
+          <input class="campo-input" id="cont_uf" placeholder="BA" maxlength="2">
+        </div>
+      </div>
+      <div class="campo-grupo">
+        <div class="campo-label">Complemento <span class="tag-opcional">(opcional)</span></div>
+        <input class="campo-input" id="cont_comp" placeholder="Sala, andar, bloco etc.">
+      </div>
+
+      <div class="nav-btns">
+        <div></div>
+        <button class="btn-avancar" onclick="avancar(1)">Próximo passo →</button>
+      </div>
+    </div>
+
+    <!-- ── ETAPA 2: CONTRATADA ── -->
+    <div id="etapa-2" class="card-etapa" style="display:none">
+      <h2>Passo 2 — Dados da Contratada (Prestador de Serviço)</h2>
+      <p class="descricao-etapa">Preencha os dados de quem vai prestar o serviço. Pode ser MEI, empresa ou profissional autônomo com CNPJ.</p>
+
+      <div class="campo-grupo">
+        <div class="campo-label">CNPJ da Contratada <span class="obrig">*</span>
+          <div class="tooltip-wrap"><button class="tooltip-btn">?</button><div class="tooltip-box">CNPJ de quem vai prestar o serviço. Pode ser MEI (Microempreendedor Individual) ou qualquer empresa. Clique em "Buscar" para preencher automaticamente.</div></div>
+        </div>
+        <div class="lookup-row">
+          <input class="campo-input" id="ctda_cnpj" placeholder="00.000.000/0001-00" maxlength="18" oninput="mascararCNPJ(this)">
+          <button class="btn-lookup" onclick="buscarCNPJContratada()">🔍 Buscar</button>
+        </div>
+        <div class="lookup-status" id="status-cnpj-ctda"></div>
+      </div>
+
+      <div class="campo-grupo">
+        <div class="campo-label">Nome / Razão Social <span class="obrig">*</span>
+          <div class="tooltip-wrap"><button class="tooltip-btn">?</button><div class="tooltip-box">Nome completo da pessoa ou razão social da empresa que vai prestar o serviço. Para MEI, geralmente é o nome da pessoa seguido de "MEI".</div></div>
+        </div>
+        <input class="campo-input" id="ctda_nome" placeholder="Ex.: João Silva Nutrição MEI">
+      </div>
+
+      <div class="campo-grupo">
+        <div class="campo-label">Qualificação Jurídica <span class="obrig">*</span>
+          <div class="tooltip-wrap"><button class="tooltip-btn">?</button><div class="tooltip-box">Como a contratada está registrada. Exemplos: "Microempreendedor Individual (MEI)", "Sociedade Limitada (Ltda)", "Empresa Individual de Responsabilidade Limitada (EIRELI)".</div></div>
+        </div>
+        <input class="campo-input" id="ctda_qual" placeholder="Ex.: Microempreendedora Individual (MEI)">
+      </div>
+
+      <div class="secao-titulo">Endereço da Contratada</div>
+      <div class="campo-grupo">
+        <div class="campo-label">CEP <span class="obrig">*</span></div>
+        <div class="lookup-row">
+          <input class="campo-input" id="ctda_cep" placeholder="00000-000" maxlength="9" oninput="mascararCEP(this)">
+          <button class="btn-lookup" onclick="buscarCEP('ctda')">🔍 Buscar</button>
+        </div>
+        <div class="lookup-status" id="status-cep-ctda"></div>
+      </div>
+      <div class="row-2">
+        <div class="campo-grupo">
+          <div class="campo-label">Logradouro <span class="obrig">*</span></div>
+          <input class="campo-input" id="ctda_rua" placeholder="Rua / Avenida">
+        </div>
+        <div class="campo-grupo">
+          <div class="campo-label">Número <span class="obrig">*</span></div>
+          <input class="campo-input" id="ctda_num" placeholder="Ex.: 19">
+        </div>
+      </div>
+      <div class="row-3">
+        <div class="campo-grupo">
+          <div class="campo-label">Bairro</div>
+          <input class="campo-input" id="ctda_bairro" placeholder="Bairro">
+        </div>
+        <div class="campo-grupo">
+          <div class="campo-label">Município <span class="obrig">*</span></div>
+          <input class="campo-input" id="ctda_cidade" placeholder="Cidade">
+        </div>
+        <div class="campo-grupo">
+          <div class="campo-label">UF <span class="obrig">*</span></div>
+          <input class="campo-input" id="ctda_uf" placeholder="BA" maxlength="2">
+        </div>
+      </div>
+      <div class="campo-grupo">
+        <div class="campo-label">Complemento <span class="tag-opcional">(opcional)</span></div>
+        <input class="campo-input" id="ctda_comp" placeholder="Sala, andar etc.">
+      </div>
+
+      <div class="nav-btns">
+        <button class="btn-voltar" onclick="voltar(2)">← Voltar</button>
+        <button class="btn-avancar" onclick="avancar(2)">Próximo passo →</button>
+      </div>
+    </div>
+
+    <!-- ── ETAPA 3: OBJETO ── -->
+    <div id="etapa-3" class="card-etapa" style="display:none">
+      <h2>Passo 3 — Objeto do Contrato</h2>
+      <p class="descricao-etapa">Descreva o que será feito, onde e por quanto tempo. Quanto mais específico, melhor a proteção jurídica da empresa.</p>
+
+      <div class="campo-grupo">
+        <div class="campo-label">Descrição do Serviço <span class="obrig">*</span>
+          <div class="tooltip-wrap"><button class="tooltip-btn">?</button><div class="tooltip-box">Descreva brevemente o serviço a ser prestado. Exemplos: "assessoria técnica em controle de qualidade alimentar", "consultoria contábil e fiscal", "desenvolvimento de sistemas de TI". Seja específico — contratos vagos são mais fáceis de contestar na Justiça.</div></div>
+        </div>
+        <textarea class="campo-textarea" id="obj_desc" placeholder="Ex.: prestação de serviços técnicos de assessoria, auditoria e controle de qualidade na área de alimentação"></textarea>
+      </div>
+
+      <div class="campo-grupo">
+        <div class="campo-label">Local(is) de Execução <span class="obrig">*</span>
+          <div class="tooltip-wrap"><button class="tooltip-btn">?</button><div class="tooltip-box">Onde o serviço será executado. Pode ser remoto, presencial ou híbrido. Exemplos: "municípios de Irecê e Iraquara/BA", "escritório da contratante em Salvador/BA", "modalidade remota".</div></div>
+        </div>
+        <input class="campo-input" id="obj_local" placeholder="Ex.: unidades nos municípios de Irecê e Iraquara/BA, podendo ser executado remotamente">
+      </div>
+
+      <div class="secao-titulo">Vigência</div>
+      <div class="row-2">
+        <div class="campo-grupo">
+          <div class="campo-label">Data de Início <span class="obrig">*</span>
+            <div class="tooltip-wrap"><button class="tooltip-btn">?</button><div class="tooltip-box">Data em que o serviço começa. Normalmente é a data de assinatura do contrato.</div></div>
+          </div>
+          <input class="campo-input" type="date" id="vig_inicio">
+        </div>
+        <div class="campo-grupo">
+          <div class="campo-label">Tipo de Prazo <span class="obrig">*</span>
+            <div class="tooltip-wrap"><button class="tooltip-btn">?</button><div class="tooltip-box">Indeterminado: o contrato continua até que uma das partes queira encerrar, com aviso prévio. Determinado: tem data certa de término. Para prestações contínuas, o prazo indeterminado é mais comum.</div></div>
+          </div>
+          <select class="campo-select" id="vig_tipo" onchange="toggleVigFim()">
+            <option value="indeterminado">Prazo Indeterminado</option>
+            <option value="determinado">Prazo Determinado</option>
+          </select>
+        </div>
+      </div>
+      <div class="campo-grupo" id="vig_fim_wrap" style="display:none">
+        <div class="campo-label">Data de Término <span class="obrig">*</span></div>
+        <input class="campo-input" type="date" id="vig_fim">
+      </div>
+      <div class="campo-grupo">
+        <div class="campo-label">Aviso Prévio para Rescisão (dias) <span class="obrig">*</span>
+          <div class="tooltip-wrap"><button class="tooltip-btn">?</button><div class="tooltip-box">Quantos dias de antecedência a empresa ou o prestador precisam avisar antes de encerrar o contrato sem motivo. O padrão mais usado é 30 dias.</div></div>
+        </div>
+        <input class="campo-input" id="vig_aviso" value="30" style="max-width:120px">
+      </div>
+
+      <div class="secao-titulo">Local de Assinatura e Foro</div>
+      <div class="row-2">
+        <div class="campo-grupo">
+          <div class="campo-label">Cidade de Assinatura <span class="obrig">*</span>
+            <div class="tooltip-wrap"><button class="tooltip-btn">?</button><div class="tooltip-box">Cidade onde o contrato será assinado. Normalmente é onde fica a empresa contratante.</div></div>
+          </div>
+          <input class="campo-input" id="foro_cidade" placeholder="Ex.: Salvador">
+        </div>
+        <div class="campo-grupo">
+          <div class="campo-label">Estado (UF) <span class="obrig">*</span></div>
+          <input class="campo-input" id="foro_uf" placeholder="Ex.: Bahia" style="max-width:140px">
+        </div>
+      </div>
+
+      <div class="nav-btns">
+        <button class="btn-voltar" onclick="voltar(3)">← Voltar</button>
+        <button class="btn-avancar" onclick="avancar(3)">Próximo passo →</button>
+      </div>
+    </div>
+
+    <!-- ── ETAPA 4: REMUNERAÇÃO ── -->
+    <div id="etapa-4" class="card-etapa" style="display:none">
+      <h2>Passo 4 — Remuneração</h2>
+      <p class="descricao-etapa">Defina o valor a ser pago e as condições de pagamento. Esses dados são essenciais para que o contrato tenha validade.</p>
+
+      <div class="campo-grupo">
+        <div class="campo-label">Valor Fixo Mensal (R$) <span class="obrig">*</span>
+          <div class="tooltip-wrap"><button class="tooltip-btn">?</button><div class="tooltip-box">Valor em reais que será pago mensalmente pelo serviço. Use ponto para separar milhar e vírgula para centavos. Ex.: 3.500,00</div></div>
+        </div>
+        <input class="campo-input" id="rem_valor" placeholder="Ex.: 3.500,00" style="max-width:200px" oninput="gerarExtenso()">
+      </div>
+      <div class="campo-grupo">
+        <div class="campo-label">Valor por Extenso <span class="obrig">*</span>
+          <div class="tooltip-wrap"><button class="tooltip-btn">?</button><div class="tooltip-box">Escreva o valor por extenso em português. Isso é obrigatório em contratos para evitar divergências. Ex.: três mil e quinhentos reais.</div></div>
+        </div>
+        <input class="campo-input" id="rem_extenso" placeholder="Ex.: três mil e quinhentos reais">
+        <div class="campo-hint" id="hint-extenso"></div>
+      </div>
+      <div class="campo-grupo">
+        <div class="campo-label">Dia de Pagamento (do mês seguinte) <span class="obrig">*</span>
+          <div class="tooltip-wrap"><button class="tooltip-btn">?</button><div class="tooltip-box">Em que dia do mês seguinte o pagamento será feito. Ex.: "5" significa que o pagamento do serviço de janeiro será feito até o dia 5 de fevereiro.</div></div>
+        </div>
+        <input class="campo-input" id="rem_dia" value="5" style="max-width:80px" maxlength="2">
+      </div>
+
+      <!-- BLOCO OPCIONAL: Remuneração Variável -->
+      <div class="bloco-opcional">
+        <div class="bloco-header" onclick="toggleBloco('var')">
+          <div>
+            <div class="bloco-titulo">Remuneração Variável por Resultados <span class="bloco-badge">OPCIONAL</span></div>
+            <div class="bloco-subtitulo">Inclua apenas se houver bônus atrelado a metas (ex.: redução de desperdício, CMV, indicadores de qualidade)</div>
+          </div>
+          <label class="switch" onclick="event.stopPropagation()">
+            <input type="checkbox" id="opt_var" onchange="toggleBloco('var')">
+            <span class="switch-slider"></span>
+          </label>
+        </div>
+        <div class="bloco-conteudo" id="bloco-var">
+          <div class="campo-grupo">
+            <div class="campo-label">Descrição das Metas
+              <div class="tooltip-wrap"><button class="tooltip-btn">?</button><div class="tooltip-box">Descreva quais metas darão direito ao bônus. Ex.: "redução do Custo da Mercadoria Vendida (CMV), eliminação de desperdícios e melhoria de indicadores de qualidade".</div></div>
+            </div>
+            <textarea class="campo-textarea" id="var_meta" placeholder="Ex.: redução do CMV, melhoria de indicadores de qualidade, eliminação de desperdícios"></textarea>
+          </div>
+          <div class="campo-grupo">
+            <div class="campo-label">Prazo para definir os critérios (dias)
+              <div class="tooltip-wrap"><button class="tooltip-btn">?</button><div class="tooltip-box">Prazo para assinar um documento complementar que detalhará os percentuais e regras do bônus. O padrão é 60 dias.</div></div>
+            </div>
+            <input class="campo-input" id="var_prazo" value="60" style="max-width:100px">
+          </div>
+        </div>
+      </div>
+
+      <div class="nav-btns">
+        <button class="btn-voltar" onclick="voltar(4)">← Voltar</button>
+        <button class="btn-avancar" onclick="avancar(4)">Próximo passo →</button>
+      </div>
+    </div>
+
+    <!-- ── ETAPA 5: CLÁUSULAS OPCIONAIS ── -->
+    <div id="etapa-5" class="card-etapa" style="display:none">
+      <h2>Passo 5 — Cláusulas Especiais</h2>
+      <p class="descricao-etapa">Ative apenas as cláusulas que se aplicam a este contrato. Em caso de dúvida, consulte o advogado responsável antes de ativar.</p>
+
+      <!-- Visitas Presenciais -->
+      <div class="bloco-opcional">
+        <div class="bloco-header" onclick="toggleBloco('vis')">
+          <div>
+            <div class="bloco-titulo">Visitas Presenciais <span class="bloco-badge">OPCIONAL</span></div>
+            <div class="bloco-subtitulo">Ative se o prestador precisar ir pessoalmente às instalações da empresa</div>
+          </div>
+          <label class="switch" onclick="event.stopPropagation()">
+            <input type="checkbox" id="opt_vis" onchange="toggleBloco('vis')">
+            <span class="switch-slider"></span>
+          </label>
+        </div>
+        <div class="bloco-conteudo" id="bloco-vis">
+          <div class="campo-grupo">
+            <div class="campo-label">Condição/Frequência das Visitas
+              <div class="tooltip-wrap"><button class="tooltip-btn">?</button><div class="tooltip-box">Descreva quando as visitas ocorrem. Importante: não coloque horários fixos. Ex.: "conforme necessidade técnica para elaboração dos laudos previstos no Anexo Técnico".</div></div>
+            </div>
+            <input class="campo-input" id="vis_freq" placeholder="Ex.: conforme necessidade técnica para elaboração dos laudos previstos no Anexo Técnico">
+          </div>
+        </div>
+      </div>
+
+      <!-- Habilitação Profissional -->
+      <div class="bloco-opcional">
+        <div class="bloco-header" onclick="toggleBloco('hab')">
+          <div>
+            <div class="bloco-titulo">Habilitação em Conselho de Classe <span class="bloco-badge">OPCIONAL</span></div>
+            <div class="bloco-subtitulo">Ative se o serviço exigir registro profissional regulamentado (CRM, CRN, CRC, OAB, CREA etc.)</div>
+          </div>
+          <label class="switch" onclick="event.stopPropagation()">
+            <input type="checkbox" id="opt_hab" onchange="toggleBloco('hab')">
+            <span class="switch-slider"></span>
+          </label>
+        </div>
+        <div class="bloco-conteudo" id="bloco-hab">
+          <div class="campo-grupo">
+            <div class="campo-label">Nome do Conselho de Classe
+              <div class="tooltip-wrap"><button class="tooltip-btn">?</button><div class="tooltip-box">Informe o conselho profissional exigido. Ex.: "Conselho Regional de Nutrição (CRN)", "Conselho Regional de Contabilidade (CRC)", "Conselho Regional de Medicina (CRM)".</div></div>
+            </div>
+            <input class="campo-input" id="hab_conselho" placeholder="Ex.: Conselho Regional de Nutrição (CRN)">
+          </div>
+        </div>
+      </div>
+
+      <!-- Subcontratação -->
+      <div class="bloco-opcional">
+        <div class="bloco-header" onclick="toggleBloco('sub')">
+          <div>
+            <div class="bloco-titulo">Subcontratação / Quarteirização <span class="bloco-badge">OPCIONAL</span></div>
+            <div class="bloco-subtitulo">Ative se o prestador puder contratar outros profissionais para ajudá-lo na execução do serviço</div>
+          </div>
+          <label class="switch" onclick="event.stopPropagation()">
+            <input type="checkbox" id="opt_sub" onchange="toggleBloco('sub')">
+            <span class="switch-slider"></span>
+          </label>
+        </div>
+      </div>
+
+      <!-- Ex-empregado -->
+      <div class="bloco-opcional">
+        <div class="bloco-header" onclick="toggleBloco('quarentena')">
+          <div>
+            <div class="bloco-titulo">⚠️ Prestador foi empregado desta empresa <span class="bloco-badge">ATENÇÃO</span></div>
+            <div class="bloco-subtitulo">Ative SOMENTE se a contratada já foi empregada (carteira assinada) desta empresa nos últimos 18 meses</div>
+          </div>
+          <label class="switch" onclick="event.stopPropagation()">
+            <input type="checkbox" id="opt_quarentena" onchange="toggleBloco('quarentena')">
+            <span class="switch-slider"></span>
+          </label>
+        </div>
+        <div class="bloco-conteudo" id="bloco-quarentena">
+          <div class="aviso-isencao" style="margin-bottom:0">
+            <strong>⚠️ Atenção: situação de alto risco jurídico</strong>
+            Contratar como PJ alguém que foi empregado CLT da mesma empresa nos últimos 18 meses é proibido por lei (art. 5º-C da Lei 6.019/1974), salvo se o período de quarentena de 18 meses já tiver sido cumprido. Confirme a data de demissão antes de prosseguir. Em caso de dúvida, consulte o advogado responsável.
+          </div>
+          <div class="campo-grupo" style="margin-top:12px">
+            <div class="campo-label">Data de encerramento do vínculo CLT anterior
+              <div class="tooltip-wrap"><button class="tooltip-btn">?</button><div class="tooltip-box">Data em que a pessoa foi demitida ou pediu demissão. Essa data será registrada no contrato como declaração da contratada.</div></div>
+            </div>
+            <input class="campo-input" type="date" id="quarentena_data" style="max-width:200px">
+          </div>
+        </div>
+      </div>
+
+      <div class="nav-btns">
+        <button class="btn-voltar" onclick="voltar(5)">← Voltar</button>
+        <button class="btn-avancar" onclick="avancar(5)">Revisar e Exportar →</button>
+      </div>
+    </div>
+
+    <!-- ── ETAPA 6: EXPORTAR ── -->
+    <div id="etapa-6" class="card-etapa" style="display:none">
+      <h2>Passo 6 — Revisar e Exportar</h2>
+      <p class="descricao-etapa">Confira o resumo abaixo antes de gerar o contrato. Se precisar corrigir algum dado, clique em "Voltar".</p>
+
+      <div class="resumo-contrato" id="resumo-final"></div>
+
+      <div style="margin-bottom:20px">
+        <button class="btn-exportar btn-docx" onclick="confirmarExportar('docx')">
+          📄 Baixar como Word (.docx)
+        </button>
+        <button class="btn-exportar btn-pdf" onclick="confirmarExportar('pdf')">
+          🖨️ Imprimir / Salvar como PDF
+        </button>
+      </div>
+
+      <div class="nav-btns">
+        <button class="btn-voltar" onclick="voltar(6)">← Voltar e editar</button>
+        <div></div>
+      </div>
+
+      <!-- Histórico -->
+      <div style="margin-top:28px; border-top:1px solid var(--cinza-borda); padding-top:20px">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+          <h3 style="font-size:14px;color:var(--azul)">📋 Histórico de Contratos Gerados</h3>
+          <button class="btn-mini" onclick="limparHistorico()">Limpar histórico</button>
+        </div>
+        <div class="historico-lista" id="historico-lista">
+          <p style="font-size:13px;color:#aaa">Nenhum contrato gerado ainda.</p>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /main -->
+</div><!-- /app -->
+
+<!-- ══════ MODAL DE ISENÇÃO ══════ -->
+<div class="modal-overlay" id="modal-isencao">
+  <div class="modal-box">
+    <h3>⚠️ Aviso Importante — Leia antes de continuar</h3>
+    <p>Este sistema gera um modelo contratual com base nas informações fornecidas por você.</p>
+    <p><strong>A responsabilidade pelo preenchimento correto e pela adequação do contrato à realidade do serviço é exclusivamente da empresa preenchente.</strong></p>
+    <p>O advogado responsável pela elaboração deste modelo não responde por erros, omissões ou informações incorretas inseridas neste formulário, nem por eventuais nulidades ou condenações decorrentes de preenchimento inadequado.</p>
+    <p>Em caso de dúvida sobre qualquer campo, consulte o advogado responsável antes de gerar o documento.</p>
+    <div style="background:#e8f4fd;border:1.5px solid #2563a8;border-radius:8px;padding:14px 16px;margin-top:4px">
+      <p style="margin:0;font-size:13px;color:#1a3a5c"><strong>📋 Próximo passo obrigatório:</strong> Após gerar o documento, envie-o para revisão e validação jurídica <strong>antes de assinar</strong>.<br><br>
+      <strong>Raphael Pizani Advocacia</strong><br>
+      ✉️ raphaelpizani@gmail.com<br>
+      📱 (71) 98168-4013<br><br>
+      <em>A assinatura do contrato sem revisão prévia do advogado é de exclusiva responsabilidade da empresa.</em></p>
+    </div>
+    <div id="modal-acao"></div>
+    <div class="modal-btns">
+      <button class="btn-cancelar" onclick="fecharModal()">Cancelar</button>
+      <button class="btn-confirmar" id="btn-confirmar-modal">Entendi, prosseguir</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════════════
+// CONFIG — altere apenas esta linha para cada empresa:
+const SENHA_ACESSO = "contrato2025";
+// ══════════════════════════════════════════════
+
+let etapaAtual = 1;
+let acaoModal = null;
+
+// ── LOGIN ──
+function fazerLogin() {
+  const s = document.getElementById('campo-senha').value;
+  if (s === SENHA_ACESSO) {
+    document.getElementById('tela-login').style.display = 'none';
+    document.getElementById('app').style.display = 'block';
+    carregarHistorico();
+  } else {
+    document.getElementById('login-erro').style.display = 'block';
+  }
+}
+function sair() {
+  document.getElementById('tela-login').style.display = 'flex';
+  document.getElementById('app').style.display = 'none';
+  document.getElementById('campo-senha').value = '';
+}
+
+// ── PROGRESSO ──
+function irParaEtapa(n) {
+  if (n > etapaAtual) return;
+  mostrarEtapa(n);
+}
+function mostrarEtapa(n) {
+  for (let i = 1; i <= 6; i++) {
+    const el = document.getElementById('etapa-' + i);
+    if (el) el.style.display = (i === n) ? 'block' : 'none';
+    const circ = document.getElementById('circ-' + i);
+    const etapa = circ ? circ.closest('.etapa') : null;
+    if (etapa) {
+      etapa.classList.remove('ativa', 'concluida');
+      if (i === n) etapa.classList.add('ativa');
+      else if (i < n) { etapa.classList.add('concluida'); circ.textContent = '✓'; }
+      else circ.textContent = i;
+    }
+  }
+  etapaAtual = n;
+  window.scrollTo(0, 0);
+  if (n === 6) gerarResumo();
+}
+
+function avancar(de) {
+  if (!validarEtapa(de)) return;
+  mostrarEtapa(de + 1);
+}
+function voltar(de) { mostrarEtapa(de - 1); }
+
+// ── VALIDAÇÃO ──
+const camposObrigatorios = {
+  1: ['cont_cnpj','cont_nome','cont_rep','cont_rep_cpf','cont_rep_cargo','cont_rua','cont_num','cont_cidade','cont_uf'],
+  2: ['ctda_cnpj','ctda_nome','ctda_qual','ctda_rua','ctda_num','ctda_cidade','ctda_uf'],
+  3: ['obj_desc','obj_local','vig_inicio','foro_cidade','foro_uf'],
+  4: ['rem_valor','rem_extenso','rem_dia'],
+  5: [],
+};
+function validarEtapa(n) {
+  const campos = camposObrigatorios[n] || [];
+  let ok = true;
+  campos.forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    const vazio = !el.value.trim();
+    el.classList.toggle('erro', vazio);
+    if (vazio) ok = false;
+  });
+  if (!ok) {
+    alert('Por favor, preencha todos os campos obrigatórios (marcados com *).');
+  }
+  return ok;
+}
+
+// ── MÁSCARAS ──
+function mascararCNPJ(el) {
+  let v = el.value.replace(/\D/g, '').slice(0, 14);
+  v = v.replace(/(\d{2})(\d)/, '$1.$2');
+  v = v.replace(/(\d{2})\.(\d{3})(\d)/, '$1.$2.$3');
+  v = v.replace(/\.(\d{3})(\d)/, '.$1/$2');
+  v = v.replace(/(\d{4})(\d)/, '$1-$2');
+  el.value = v;
+}
+function mascararCPF(el) {
+  let v = el.value.replace(/\D/g, '').slice(0, 11);
+  v = v.replace(/(\d{3})(\d)/, '$1.$2');
+  v = v.replace(/(\d{3})\.(\d{3})(\d)/, '$1.$2.$3');
+  v = v.replace(/\.(\d{3})(\d)/, '.$1-$2');
+  el.value = v;
+}
+function mascararCEP(el) {
+  let v = el.value.replace(/\D/g, '').slice(0, 8);
+  v = v.replace(/(\d{5})(\d)/, '$1-$2');
+  el.value = v;
+}
+
+// ── LOOKUP CNPJ ──
+async function fetchCNPJ(cnpj) {
+  // Tenta BrasilAPI primeiro, depois ReceitaWS como fallback
+  const apis = [
+    async () => {
+      const r = await fetch(`https://brasilapi.com.br/api/cnpj/v1/${cnpj}`);
+      if (!r.ok) throw new Error();
+      return await r.json();
+    },
+    async () => {
+      const r = await fetch(`https://receitaws.com.br/v1/cnpj/${cnpj}`);
+      if (!r.ok) throw new Error();
+      const d = await r.json();
+      if (d.status === 'ERROR') throw new Error();
+      // Normaliza para o mesmo formato da BrasilAPI
+      return {
+        razao_social: d.nome,
+        logradouro: d.logradouro,
+        numero: d.numero,
+        bairro: d.bairro,
+        municipio: d.municipio,
+        uf: d.uf,
+        cep: d.cep ? d.cep.replace(/\D/g,'') : '',
+        descricao_situacao_cadastral: d.situacao || ''
+      };
+    }
+  ];
+  for (const api of apis) {
+    try { return await api(); } catch(e) { continue; }
+  }
+  throw new Error('Nenhuma API respondeu');
+}
+
+function preencherEndereco(prefixo, d) {
+  if (d.logradouro) document.getElementById(prefixo+'_rua').value = d.logradouro;
+  if (d.numero) document.getElementById(prefixo+'_num').value = d.numero;
+  if (d.bairro) document.getElementById(prefixo+'_bairro').value = d.bairro;
+  if (d.municipio) document.getElementById(prefixo+'_cidade').value = d.municipio;
+  if (d.uf) document.getElementById(prefixo+'_uf').value = d.uf;
+  if (d.cep) {
+    const cep = d.cep.replace(/\D/g,'');
+    document.getElementById(prefixo+'_cep').value = cep.replace(/(\d{5})(\d{3})/, '$1-$2');
+  }
+}
+
+async function buscarCNPJ() {
+  const cnpj = document.getElementById('cont_cnpj').value.replace(/\D/g, '');
+  if (cnpj.length !== 14) { alert('Digite um CNPJ válido com 14 dígitos.'); return; }
+  const st = document.getElementById('status-cnpj');
+  st.textContent = 'Buscando...'; st.className = 'lookup-status';
+  try {
+    const d = await fetchCNPJ(cnpj);
+    document.getElementById('cont_nome').value = d.razao_social || '';
+    preencherEndereco('cont', d);
+    st.textContent = '✓ Dados preenchidos automaticamente'; st.className = 'lookup-status ok';
+  } catch(e) {
+    st.innerHTML = '✗ Busca automática indisponível (necessário internet / servidor). <strong>Preencha manualmente — isso não impede o uso do sistema.</strong>';
+    st.className = 'lookup-status erro';
+  }
+}
+
+async function buscarCNPJContratada() {
+  const cnpj = document.getElementById('ctda_cnpj').value.replace(/\D/g, '');
+  if (cnpj.length !== 14) { alert('Digite um CNPJ válido com 14 dígitos.'); return; }
+  const st = document.getElementById('status-cnpj-ctda');
+  st.textContent = 'Buscando...'; st.className = 'lookup-status';
+  try {
+    const d = await fetchCNPJ(cnpj);
+    document.getElementById('ctda_nome').value = d.razao_social || '';
+    const sit = (d.descricao_situacao_cadastral||'').toLowerCase();
+    const nome = (d.razao_social||'').toLowerCase();
+    if (sit.includes('mei') || nome.includes('mei')) {
+      document.getElementById('ctda_qual').value = 'Microempreendedor Individual (MEI)';
+    } else if (nome.includes('ltda')) {
+      document.getElementById('ctda_qual').value = 'Sociedade Limitada (Ltda)';
+    }
+    preencherEndereco('ctda', d);
+    st.textContent = '✓ Dados preenchidos automaticamente'; st.className = 'lookup-status ok';
+  } catch(e) {
+    st.innerHTML = '✗ Busca automática indisponível (necessário internet / servidor). <strong>Preencha manualmente — isso não impede o uso do sistema.</strong>';
+    st.className = 'lookup-status erro';
+  }
+}
+
+// ── LOOKUP CEP ──
+async function buscarCEP(prefixo) {
+  const cep = document.getElementById(prefixo + '_cep').value.replace(/\D/g, '');
+  if (cep.length !== 8) { alert('Digite um CEP válido com 8 dígitos.'); return; }
+  const st = document.getElementById('status-cep-' + prefixo);
+  st.textContent = 'Buscando...'; st.className = 'lookup-status';
+  const apis = [
+    async () => {
+      const r = await fetch('https://viacep.com.br/ws/' + cep + '/json/');
+      if (!r.ok) throw new Error();
+      const d = await r.json();
+      if (d.erro) throw new Error();
+      return { rua: d.logradouro||'', bairro: d.bairro||'', cidade: d.localidade||'', uf: d.uf||'' };
+    },
+    async () => {
+      const r = await fetch('https://brasilapi.com.br/api/cep/v2/' + cep);
+      if (!r.ok) throw new Error();
+      const d = await r.json();
+      return { rua: d.street||'', bairro: d.neighborhood||'', cidade: d.city||'', uf: d.state||'' };
+    }
+  ];
+  for (const api of apis) {
+    try {
+      const d = await api();
+      document.getElementById(prefixo + '_rua').value = d.rua;
+      document.getElementById(prefixo + '_bairro').value = d.bairro;
+      document.getElementById(prefixo + '_cidade').value = d.cidade;
+      document.getElementById(prefixo + '_uf').value = d.uf;
+      st.textContent = '✓ Endereço preenchido automaticamente'; st.className = 'lookup-status ok';
+      return;
+    } catch(e) { continue; }
+  }
+  st.innerHTML = '✗ Busca automática indisponível (necessário internet). <strong>Preencha manualmente — isso não impede o uso do sistema.</strong>';
+  st.className = 'lookup-status erro';
+}
+
+// ── TOGGLE BLOCOS ──
+function toggleBloco(id) {
+  const chk = document.getElementById('opt_' + id);
+  const cont = document.getElementById('bloco-' + id);
+  if (!cont) return;
+  cont.classList.toggle('aberto', chk && chk.checked);
+}
+function toggleVigFim() {
+  const tipo = document.getElementById('vig_tipo').value;
+  document.getElementById('vig_fim_wrap').style.display = tipo === 'determinado' ? 'block' : 'none';
+}
+
+// ── EXTENSO (sugestão simples) ──
+function gerarExtenso() {
+  const v = document.getElementById('rem_valor').value.replace(/\./g,'').replace(',','.');
+  const n = parseFloat(v);
+  if (isNaN(n)) { document.getElementById('hint-extenso').textContent = ''; return; }
+  document.getElementById('hint-extenso').textContent = 'Sugestão: ' + numeroParaExtenso(n);
+}
+function numeroParaExtenso(n) {
+  const unidades = ['','um','dois','três','quatro','cinco','seis','sete','oito','nove','dez','onze','doze','treze','quatorze','quinze','dezesseis','dezessete','dezoito','dezenove'];
+  const dezenas = ['','','vinte','trinta','quarenta','cinquenta','sessenta','setenta','oitenta','noventa'];
+  const centenas = ['','cem','duzentos','trezentos','quatrocentos','quinhentos','seiscentos','setecentos','oitocentos','novecentos'];
+  if (n === 0) return 'zero reais';
+  const inteiro = Math.floor(n);
+  const cents = Math.round((n - inteiro) * 100);
+  function tres(x) {
+    if (x === 0) return '';
+    if (x === 100) return 'cem';
+    let r = '';
+    if (x >= 100) { r += centenas[Math.floor(x/100)]; x %= 100; if (x > 0) r += ' e '; }
+    if (x >= 20) { r += dezenas[Math.floor(x/10)]; x %= 10; if (x > 0) r += ' e ' + unidades[x]; }
+    else if (x > 0) r += unidades[x];
+    return r;
+  }
+  let resultado = '';
+  if (inteiro >= 1000) {
+    const mil = Math.floor(inteiro/1000);
+    resultado += (mil === 1 ? 'mil' : tres(mil) + ' mil');
+    if (inteiro % 1000 > 0) resultado += ' e ' + tres(inteiro % 1000);
+  } else {
+    resultado += tres(inteiro);
+  }
+  resultado += inteiro === 1 ? ' real' : ' reais';
+  if (cents > 0) resultado += ' e ' + tres(cents) + (cents === 1 ? ' centavo' : ' centavos');
+  return resultado;
+}
+
+// ── RESUMO ──
+function gerarResumo() {
+  const g = id => (document.getElementById(id) || {}).value || '';
+  const chk = id => (document.getElementById(id) || {}).checked;
+  const endCont = [g('cont_rua'), g('cont_num'), g('cont_bairro'), g('cont_cidade'), g('cont_uf')].filter(Boolean).join(', ') + (g('cont_comp') ? ', ' + g('cont_comp') : '');
+  const endCtda = [g('ctda_rua'), g('ctda_num'), g('ctda_bairro'), g('ctda_cidade'), g('ctda_uf')].filter(Boolean).join(', ');
+  const items = [
+    ['Contratante', g('cont_nome')],
+    ['CNPJ Contratante', g('cont_cnpj')],
+    ['Representante', g('cont_rep') + ' (' + g('cont_rep_cargo') + ')'],
+    ['Endereço Contratante', endCont],
+    ['---',''],
+    ['Contratada', g('ctda_nome') + ' — ' + g('ctda_qual')],
+    ['CNPJ Contratada', g('ctda_cnpj')],
+    ['Endereço Contratada', endCtda],
+    ['---',''],
+    ['Objeto', g('obj_desc')],
+    ['Local de execução', g('obj_local')],
+    ['Início', g('vig_inicio') ? formatarData(g('vig_inicio')) : '—'],
+    ['Vigência', g('vig_tipo') === 'determinado' ? 'Determinado até ' + formatarData(g('vig_fim')) : 'Indeterminado'],
+    ['Aviso Prévio', g('vig_aviso') + ' dias'],
+    ['---',''],
+    ['Valor Mensal', 'R$ ' + g('rem_valor') + ' (' + g('rem_extenso') + ')'],
+    ['Dia de Pagamento', 'Dia ' + g('rem_dia') + ' do mês subsequente'],
+    ['---',''],
+    ['Foro', g('foro_cidade') + '/' + g('foro_uf')],
+    ['Rem. Variável', chk('opt_var') ? 'Sim — ' + g('var_meta') : 'Não'],
+    ['Visitas Presenciais', chk('opt_vis') ? 'Sim' : 'Não'],
+    ['Habilitação Profissional', chk('opt_hab') ? g('hab_conselho') : 'Não aplicável'],
+    ['Subcontratação', chk('opt_sub') ? 'Permitida' : 'Não prevista'],
+    ['Ex-empregado CLT', chk('opt_quarentena') ? 'Sim — encerrado em ' + formatarData(g('quarentena_data')) : 'Não'],
+  ];
+  let html = '';
+  items.forEach(([k,v]) => {
+    if (k === '---') { html += '<div style="border-top:1px solid #ddd;margin:6px 0"></div>'; return; }
+    if (v) html += `<div class="resumo-item"><span class="resumo-chave">${k}:</span><span>${v}</span></div>`;
+  });
+  document.getElementById('resumo-final').innerHTML = html;
+  carregarHistorico();
+}
+
+function formatarData(d) {
+  if (!d) return '—';
+  const [y,m,dd] = d.split('-');
+  return `${dd}/${m}/${y}`;
+}
+
+// ── MODAL ──
+function confirmarExportar(tipo) {
+  acaoModal = tipo;
+  document.getElementById('modal-isencao').classList.add('ativo');
+  document.getElementById('btn-confirmar-modal').onclick = () => {
+    fecharModal();
+    if (acaoModal === 'docx') exportarDocx();
+    else exportarPDF();
+  };
+}
+function fecharModal() {
+  document.getElementById('modal-isencao').classList.remove('ativo');
+}
+
+// ── EXPORTAR PDF ──
+function exportarPDF() {
+  const html = gerarHTMLContrato();
+  const win = window.open('', '_blank', 'width=900,height=700');
+  win.document.write(`<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8">
+<title>Contrato PJ</title>
+<style>
+  @page { margin: 2.5cm 3cm 2.5cm 3cm; }
+  body { font-family: Arial, sans-serif; font-size: 12pt; line-height: 1.7; color: #000; }
+  h1 { font-size: 13pt; text-align: center; text-transform: uppercase; margin-bottom: 18pt; letter-spacing: .04em; }
+  .partes { margin-bottom: 14pt; }
+  .cl-titulo { font-size: 12pt; font-weight: bold; margin-top: 16pt; margin-bottom: 4pt; }
+  .cl-item { text-align: justify; margin-bottom: 5pt; text-indent: 0; }
+  .assinaturas { margin-top: 40pt; }
+  .ass-bloco { display: inline-block; width: 45%; vertical-align: top; margin-right: 4%; text-align: center; }
+  .ass-linha { border-top: 1px solid #000; padding-top: 4pt; margin-top: 30pt; font-size: 11pt; }
+  .testemunhas { margin-top: 30pt; }
+  @media print { body { margin: 0; } }
+</style>
+</head><body>${html}<script>window.onload=function(){window.print();}<\/script></body></html>`);
+  win.document.close();
+}
+
+// ── GERAR HTML DO CONTRATO (usado por PDF e DOCX) ──
+function gerarHTMLContrato() {
+  const g = id => (document.getElementById(id)||{}).value||'';
+  const chk = id => (document.getElementById(id)||{}).checked;
+  const endCont = [g('cont_rua'), g('cont_num')?'nº '+g('cont_num'):'', g('cont_bairro'), g('cont_cidade')+'/'+g('cont_uf'), g('cont_cep')?'CEP '+g('cont_cep'):'', g('cont_comp')].filter(Boolean).join(', ');
+  const endCtda = [g('ctda_rua'), g('ctda_num')?'nº '+g('ctda_num'):'', g('ctda_bairro'), g('ctda_cidade')+'/'+g('ctda_uf'), g('ctda_cep')?'CEP '+g('ctda_cep'):''].filter(Boolean).join(', ');
+  const vigTexto = g('vig_tipo')==='determinado'
+    ? `O presente contrato tem início em ${formatarData(g('vig_inicio'))} e término em ${formatarData(g('vig_fim'))}, podendo ser prorrogado por mútuo acordo mediante Termo Aditivo.`
+    : `O presente contrato tem início em ${formatarData(g('vig_inicio'))} e vigorará por prazo indeterminado.`;
+
+  let n = 1;
+  const cl = (titulo, ...itens) => {
+    const num = n++;
+    const romano = ['I','II','III','IV','V','VI','VII','VIII','IX','X','XI','XII','XIII','XIV','XV'][num-1]||num;
+    return `<div class="cl-titulo">CLÁUSULA ${romano} — ${titulo}</div>` + itens.map(t=>`<p class="cl-item">${t}</p>`).join('');
+  };
+
+  let html = `<h1>CONTRATO DE PRESTAÇÃO DE SERVIÇOS TÉCNICOS</h1>
+<div class="partes">
+<p><strong>CONTRATANTE:</strong> ${g('cont_nome')}, pessoa jurídica de direito privado, inscrita no CNPJ sob o nº ${g('cont_cnpj')}, com sede em ${endCont}, neste ato representada por seu ${g('cont_rep_cargo')}, ${g('cont_rep')}, portador do CPF nº ${g('cont_rep_cpf')}.</p>
+<br>
+<p><strong>CONTRATADA:</strong> ${g('ctda_nome')}, ${g('ctda_qual')}, inscrita no CNPJ sob o nº ${g('ctda_cnpj')}, com sede em ${endCtda}.</p>
+<br>
+<p>As partes acima qualificadas celebram o presente Contrato de Prestação de Serviços Técnicos, que se regerá pelas seguintes cláusulas e condições:</p>
+</div>`;
+
+  html += cl('DO OBJETO E DO ANEXO TÉCNICO',
+    `1.1 O presente contrato tem por objeto a ${g('obj_desc')}, com execução focada em resultados operacionais mensuráveis em ${g('obj_local')}.`,
+    `1.2 Os serviços específicos, entregáveis, prazos, periodicidade e critérios de avaliação encontram-se descritos no Anexo Técnico, parte integrante e indissociável deste instrumento, assinado simultaneamente.`,
+    `1.3 A terceirização é lícita nos termos dos arts. 4.º-A e 5.º-A da Lei nº 6.019/1974, inclusive para atividades relacionadas ao objeto social da CONTRATANTE (STF, ADPF 324, Tema 725).`
+  );
+
+  html += cl('DA NATUREZA JURÍDICA E DA AUTONOMIA',
+    `2.1 O presente instrumento é de natureza estritamente civil e empresarial, não estabelecendo qualquer vínculo empregatício entre as partes, nos termos do art. 4.º-A, § 2.º, da Lei nº 6.019/1974.`,
+    `2.2 A CONTRATADA atuará com absoluta autonomia técnica, diretiva e administrativa, gerindo livremente seus métodos, ferramentas e rotinas de trabalho.`,
+    `2.3 A CONTRATANTE obriga-se a não exercer poder de direção, controle de jornada ou poder disciplinar sobre a CONTRATADA, seus prepostos ou subcontratados. O descumprimento constitui falta grave apta a ensejar rescisão imediata por iniciativa da CONTRATADA, com apuração de perdas e danos.`,
+    `2.4 As reuniões periódicas de alinhamento têm natureza exclusiva de prestação de contas sobre os entregáveis do Anexo Técnico, não configurando supervisão hierárquica nem controle da jornada ou do modo de execução.`,
+    `2.5 Quando necessário ao cumprimento do objeto, a CONTRATANTE poderá disponibilizar acesso a sistemas ou equipamentos próprios, exclusivamente para fins técnicos delimitados no Anexo Técnico, mediante credencial individual e registro de acesso. Tal disponibilização não configura integração da CONTRATADA à estrutura organizacional da CONTRATANTE nem altera a natureza civil da relação.`
+  );
+
+  html += cl('DA AUSÊNCIA DE PESSOALIDADE E EXCLUSIVIDADE',
+    `3.1 O contrato visa à entrega de resultados previstos no Anexo Técnico, não sendo intuitu personae em relação ao representante da CONTRATADA.`,
+    `3.2 É assegurado à CONTRATADA o direito de prestar serviços a quaisquer outros tomadores, concorrentes ou não da CONTRATANTE, sem exclusividade.`,
+    ...(chk('opt_sub')?[`3.3 A CONTRATADA poderá subcontratar terceiros devidamente habilitados, sendo exclusivamente responsável por remunerá-los e dirigi-los (art. 4.º-A, § 1.º, Lei nº 6.019/1974). É vedada a subcontratação de profissional inabilitado para atividades que exijam registro regulamentado.`]:[])
+  );
+
+  html += cl('DA REMUNERAÇÃO FIXA',
+    `4.1 Pelos serviços entregues conforme o Anexo Técnico, a CONTRATANTE pagará à CONTRATADA o valor fixo mensal de R$ ${g('rem_valor')} (${g('rem_extenso')}).`,
+    `4.2 Este valor remunera exclusivamente o conjunto de entregas e produtos previstos no Anexo Técnico, não configurando salário, remuneração por tempo à disposição ou verba de natureza trabalhista.`,
+    `4.3 O pagamento será realizado no dia ${g('rem_dia')} do mês subsequente, condicionado a: (a) entrega e aprovação de todos os produtos previstos no Anexo Técnico; e (b) emissão da respectiva Nota Fiscal pela CONTRATADA, compatível com seu CNAE vigente.`,
+    `4.4 A CONTRATANTE manterá registro formal dos entregáveis aprovados e notas fiscais recebidas em cada ciclo, formando histórico de due diligence contratual.`
+  );
+
+  if(chk('opt_var')) html += cl('DA REMUNERAÇÃO VARIÁVEL POR RESULTADOS',
+    `5.1 Além da remuneração fixa, poderá a CONTRATADA fazer jus a bônus variável atrelado a ${g('var_meta')||'metas de eficiência operacional'}, cujos critérios objetivos serão pactuados em Termo Aditivo específico, a celebrar-se em até ${g('var_prazo')||'60'} dias da assinatura.`,
+    `5.2 O bônus variável possui natureza de prestação civil por resultado, não configurando salário variável, comissão ou verba trabalhista. Sua percepção eventual não gera direito adquirido a pagamentos futuros.`
+  );
+
+  const nComp = chk('opt_var')?6:5;
+  html += cl('DO COMPLIANCE, REGULARIDADE E QUARENTENA',
+    `${nComp}.1 A CONTRATADA declara, sob as penas da lei: (a) possuir regularidade fiscal e previdenciária; (b) não ter prestado serviços à CONTRATANTE com vínculo celetista nos últimos 18 meses${chk('opt_quarentena')?', declarando que o vínculo anterior foi encerrado em '+formatarData(g('quarentena_data'))+', cumprido o período de quarentena do art. 5.º-C da Lei nº 6.019/1974':''}; e (c) possuir CNAE vigente compatível com o objeto deste contrato.`,
+    `${nComp}.2 A falsidade de qualquer dessas declarações constitui falta grave e autoriza rescisão imediata, sujeitando a CONTRATADA ao ressarcimento integral de eventuais condenações suportadas pela CONTRATANTE.`,
+    `${nComp}.3 A CONTRATANTE exigirá mensalmente, antes do pagamento, comprovantes de regularidade fiscal, previdenciária e junto ao conselho de classe competente, documentando o recebimento para cumprimento do dever de fiscalização (culpa in vigilando — STF, ADPF 324).`
+  );
+
+  const nResp = nComp+1;
+  html += cl('DA RESPONSABILIDADE CIVIL E REGRESSO',
+    `${nResp}.1 A CONTRATADA é exclusiva responsável pelos danos causados a terceiros em decorrência do exercício de suas atividades técnicas, não respondendo a CONTRATANTE solidariamente por tais atos.`,
+    `${nResp}.2 Caso a CONTRATANTE seja demandada judicialmente ou administrativamente — inclusive na Justiça do Trabalho — por ato ou omissão imputável à CONTRATADA, esta ressarcirá integralmente a CONTRATANTE de todos os valores despendidos, incluindo condenações, honorários advocatícios, custas e encargos de sucumbência, na forma de obrigação autônoma, líquida e exigível independentemente de liquidação por arbitramento.`,
+    `${nResp}.3 A CONTRATANTE responderá subsidiariamente pelas obrigações legais decorrentes da execução, exclusivamente quando configurada culpa in vigilando (art. 5.º-A, § 5.º, Lei nº 6.019/1974).`
+  );
+
+  if(chk('opt_vis')) html += cl('DA EXECUÇÃO REMOTA E DAS VISITAS PRESENCIAIS',
+    `O cumprimento do objeto dar-se-á, como regra, de forma remota. Visitas presenciais ocorrerão em caráter excepcional — ${g('vis_freq')||'conforme necessidade técnica'} — sendo o agendamento organizado exclusivamente pela CONTRATADA.`,
+    `É expressamente vedado aos prepostos da CONTRATANTE: (a) exigir comparecimento diário; (b) estabelecer horários fixos; e (c) exercer controle de ponto ou jornada sobre a CONTRATADA.`
+  );
+
+  html += cl('DA PROPRIEDADE INTELECTUAL DOS ENTREGÁVEIS',
+    `Todos os laudos, relatórios, planilhas, manuais e demais produtos elaborados pela CONTRATADA no âmbito deste contrato são cedidos à CONTRATANTE de forma plena, irrevogável e definitiva, mediante o pagamento da remuneração contratual (arts. 49 e 50, Lei nº 9.610/1998). A cessão abrange uso, reprodução, modificação e distribuição, preservados os direitos morais da CONTRATADA.`
+  );
+
+  html += cl('DA CONFIDENCIALIDADE E NÃO UTILIZAÇÃO COMPETITIVA',
+    `A CONTRATADA obriga-se a manter absoluto sigilo sobre informações confidenciais da CONTRATANTE acessadas em decorrência deste contrato, incluindo dados financeiros, operacionais, estratégicos e de clientes.`,
+    `A obrigação de sigilo persiste por 3 (três) anos após o término do contrato. A vedação de não utilização competitiva abrange especificamente o uso de informações confidenciais para beneficiar concorrentes diretos da CONTRATANTE.`,
+    `A violação desta cláusula sujeita a infratora ao pagamento de multa equivalente a 6 (seis) mensalidades do valor contratual, sem prejuízo de reparação de danos adicionais comprovados e da tutela inibitória do art. 497, parágrafo único, do CPC.`
+  );
+
+  html += cl('DAS DECLARAÇÕES E GARANTIAS RECÍPROCAS',
+    `Cada parte declara e garante à outra que: (a) tem plena capacidade jurídica para celebrar este contrato; (b) não existe impedimento legal, judicial, administrativo ou regulatório que inviabilize o cumprimento das obrigações assumidas; (c) as informações prestadas são verdadeiras; e (d) o instrumento foi livremente negociado, sem coação, dolo ou erro.`,
+    `A falsidade de qualquer dessas declarações confere à parte prejudicada o direito de rescisão imediata com apuração de perdas e danos.`
+  );
+
+  if(chk('opt_hab')) html += cl('DA HABILITAÇÃO PROFISSIONAL',
+    `A CONTRATADA declara possuir habilitação profissional regular e ativa perante ${g('hab_conselho')||'o conselho de classe competente'}, comprometendo-se a apresentar comprovante de regularidade sempre que solicitado, obrigatoriamente antes do início da prestação de serviços. A suspensão ou cassação do registro constitui falta grave, autorizando rescisão imediata.`
+  );
+
+  html += cl('DA VIGÊNCIA E DA RESCISÃO',
+    vigTexto,
+    `Rescisão imotivada: qualquer das partes poderá resilir o contrato mediante aviso prévio escrito com antecedência mínima de ${g('vig_aviso')||'30'} dias. O descumprimento do prazo de aviso prévio pela CONTRATANTE enseja cláusula penal compensatória equivalente a 1 (uma) mensalidade de honorários.`,
+    `Rescisão por falta grave: constitui falta grave, a título exemplificativo: (a) prática de fraude ou dolo; (b) violação da confidencialidade; (c) descumprimento reiterado dos prazos do Anexo Técnico; (d) falsidade das declarações e garantias prestadas neste instrumento; ${chk('opt_hab')?'(e) suspensão ou cassação da habilitação perante '+g('hab_conselho')+'; ':''}(${chk('opt_hab')?'f':'e'}) prática de atos que importem descrédito comercial ou moral da outra parte.`
+  );
+
+  html += cl('DA MEDIAÇÃO PRÉVIA E DO FORO',
+    `As partes elegem a mediação prévia obrigatória (Lei nº 13.140/2015) como condição de procedibilidade para quaisquer litígios civis decorrentes deste contrato, ressalvados os casos de urgência cautelar. Esta cláusula não se aplica a reclamações perante a Justiça do Trabalho.`,
+    `Não havendo acordo na mediação, fica eleito o Foro da Comarca de ${g('foro_cidade')}/${g('foro_uf')}, com renúncia expressa a qualquer outro, nos termos do art. 63 do CPC.`
+  );
+
+  html += `<div class="assinaturas">
+<p>E, por estarem justas e contratadas, assinam o presente em 02 (duas) vias de igual teor e forma.</p>
+<br>
+<p>${g('foro_cidade')}/${g('foro_uf')}, ${formatarData(g('vig_inicio'))}.</p>
+<br><br>
+<div class="ass-bloco">
+  <div class="ass-linha">${g('cont_nome')}<br><small>CONTRATANTE</small></div>
+</div>
+<div class="ass-bloco">
+  <div class="ass-linha">${g('ctda_nome')}<br><small>CONTRATADA</small></div>
+</div>
+<div class="testemunhas">
+<p><strong>Testemunhas:</strong></p><br>
+<p>Nome: ________________________________________ CPF: _______________________</p><br>
+<p>Nome: ________________________________________ CPF: _______________________</p>
+</div></div>`;
+
+  return html;
+}
+
+// ── EXPORTAR DOCX (XML puro, sem biblioteca externa) ──
+async function exportarDocx() {
+  const g = id => (document.getElementById(id)||{}).value||'';
+  const chk = id => (document.getElementById(id)||{}).checked;
+  const esc = t => String(t||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+
+  // Helpers para XML OOXML
+  function wPar(text, opts={}) {
+    const jc = opts.center ? 'center' : 'both';
+    const bold = opts.bold ? '<w:b/>' : '';
+    const sz = opts.sz || 24;
+    const before = opts.before || 80;
+    const after = opts.after || 80;
+    return `<w:p><w:pPr><w:jc w:val="${jc}"/><w:spacing w:before="${before}" w:after="${after}" w:line="360" w:lineRule="auto"/></w:pPr><w:r><w:rPr>${bold}<w:rFonts w:ascii="Arial" w:hAnsi="Arial"/><w:sz w:val="${sz}"/><w:szCs w:val="${sz}"/></w:rPr><w:t xml:space="preserve">${esc(text)}</w:t></w:r></w:p>`;
+  }
+  function wTit(text) {
+    return `<w:p><w:pPr><w:jc w:val="center"/><w:spacing w:before="240" w:after="240"/></w:pPr><w:r><w:rPr><w:b/><w:caps/><w:rFonts w:ascii="Arial" w:hAnsi="Arial"/><w:sz w:val="26"/><w:szCs w:val="26"/></w:rPr><w:t>${esc(text)}</w:t></w:r></w:p>`;
+  }
+  function wCl(text) {
+    return `<w:p><w:pPr><w:spacing w:before="200" w:after="60"/></w:pPr><w:r><w:rPr><w:b/><w:rFonts w:ascii="Arial" w:hAnsi="Arial"/><w:sz w:val="24"/><w:szCs w:val="24"/></w:rPr><w:t>${esc(text)}</w:t></w:r></w:p>`;
+  }
+  function wLn() { return `<w:p><w:pPr><w:spacing w:before="40" w:after="40"/></w:pPr></w:p>`; }
+  function wParBold(label, rest) {
+    return `<w:p><w:pPr><w:jc w:val="both"/><w:spacing w:before="80" w:after="80" w:line="360" w:lineRule="auto"/></w:pPr><w:r><w:rPr><w:b/><w:rFonts w:ascii="Arial" w:hAnsi="Arial"/><w:sz w:val="24"/><w:szCs w:val="24"/></w:rPr><w:t xml:space="preserve">${esc(label)}</w:t></w:r><w:r><w:rPr><w:rFonts w:ascii="Arial" w:hAnsi="Arial"/><w:sz w:val="24"/><w:szCs w:val="24"/></w:rPr><w:t xml:space="preserve">${esc(rest)}</w:t></w:r></w:p>`;
+  }
+
+  const endCont = [g('cont_rua'), g('cont_num')?'nº '+g('cont_num'):'', g('cont_bairro'), g('cont_cidade')+'/'+g('cont_uf'), g('cont_cep')?'CEP '+g('cont_cep'):'', g('cont_comp')].filter(Boolean).join(', ');
+  const endCtda = [g('ctda_rua'), g('ctda_num')?'nº '+g('ctda_num'):'', g('ctda_bairro'), g('ctda_cidade')+'/'+g('ctda_uf'), g('ctda_cep')?'CEP '+g('ctda_cep'):''].filter(Boolean).join(', ');
+  const vigTexto = g('vig_tipo')==='determinado'
+    ? `O presente contrato tem início em ${formatarData(g('vig_inicio'))} e término em ${formatarData(g('vig_fim'))}, podendo ser prorrogado por mútuo acordo mediante Termo Aditivo.`
+    : `O presente contrato tem início em ${formatarData(g('vig_inicio'))} e vigorará por prazo indeterminado.`;
+
+  let n=1;
+  const romano = ['I','II','III','IV','V','VI','VII','VIII','IX','X','XI','XII','XIII','XIV','XV'];
+  function cl(titulo) { return wCl(`CLÁUSULA ${romano[n++-1]||n} — ${titulo}`); }
+
+  let body = '';
+  body += wTit('CONTRATO DE PRESTAÇÃO DE SERVIÇOS TÉCNICOS');
+  body += wLn();
+  body += wParBold('CONTRATANTE: ', `${g('cont_nome')}, pessoa jurídica de direito privado, inscrita no CNPJ sob o nº ${g('cont_cnpj')}, com sede em ${endCont}, neste ato representada por seu ${g('cont_rep_cargo')}, ${g('cont_rep')}, portador do CPF nº ${g('cont_rep_cpf')}.`);
+  body += wLn();
+  body += wParBold('CONTRATADA: ', `${g('ctda_nome')}, ${g('ctda_qual')}, inscrita no CNPJ sob o nº ${g('ctda_cnpj')}, com sede em ${endCtda}.`);
+  body += wLn();
+  body += wPar('As partes acima qualificadas celebram o presente Contrato de Prestação de Serviços Técnicos, que se regerá pelas seguintes cláusulas e condições:');
+  body += wLn();
+
+  body += cl('DO OBJETO E DO ANEXO TÉCNICO');
+  body += wPar(`1.1 O presente contrato tem por objeto a ${g('obj_desc')}, com execução focada em resultados operacionais mensuráveis em ${g('obj_local')}.`);
+  body += wPar('1.2 Os serviços específicos, entregáveis, prazos, periodicidade e critérios de avaliação encontram-se descritos no Anexo Técnico, parte integrante e indissociável deste instrumento, assinado simultaneamente.');
+  body += wPar('1.3 A terceirização é lícita nos termos dos arts. 4.º-A e 5.º-A da Lei nº 6.019/1974, inclusive para atividades relacionadas ao objeto social da CONTRATANTE (STF, ADPF 324, Tema 725).');
+  body += wLn();
+
+  body += cl('DA NATUREZA JURÍDICA E DA AUTONOMIA');
+  body += wPar('2.1 O presente instrumento é de natureza estritamente civil e empresarial, não estabelecendo qualquer vínculo empregatício entre as partes, nos termos do art. 4.º-A, § 2.º, da Lei nº 6.019/1974.');
+  body += wPar('2.2 A CONTRATADA atuará com absoluta autonomia técnica, diretiva e administrativa, gerindo livremente seus métodos, ferramentas e rotinas de trabalho.');
+  body += wPar('2.3 A CONTRATANTE obriga-se a não exercer poder de direção, controle de jornada ou poder disciplinar sobre a CONTRATADA, seus prepostos ou subcontratados. O descumprimento constitui falta grave apta a ensejar rescisão imediata por iniciativa da CONTRATADA, com apuração de perdas e danos.');
+  body += wPar('2.4 As reuniões periódicas de alinhamento têm natureza exclusiva de prestação de contas sobre os entregáveis do Anexo Técnico, não configurando supervisão hierárquica nem controle da jornada ou do modo de execução.');
+  body += wPar('2.5 Quando necessário ao cumprimento do objeto, a CONTRATANTE poderá disponibilizar acesso a sistemas ou equipamentos próprios, exclusivamente para fins técnicos delimitados no Anexo Técnico, mediante credencial individual e registro de acesso. Tal disponibilização não configura integração da CONTRATADA à estrutura organizacional da CONTRATANTE nem altera a natureza civil da relação.');
+  body += wLn();
+
+  body += cl('DA AUSÊNCIA DE PESSOALIDADE E EXCLUSIVIDADE');
+  body += wPar('3.1 O contrato visa à entrega de resultados previstos no Anexo Técnico, não sendo intuitu personae em relação ao representante da CONTRATADA.');
+  body += wPar('3.2 É assegurado à CONTRATADA o direito de prestar serviços a quaisquer outros tomadores, concorrentes ou não da CONTRATANTE, sem exclusividade.');
+  if(chk('opt_sub')) body += wPar('3.3 A CONTRATADA poderá subcontratar terceiros devidamente habilitados, sendo exclusivamente responsável por remunerá-los e dirigi-los (art. 4.º-A, § 1.º, Lei nº 6.019/1974). É vedada a subcontratação de profissional inabilitado para atividades que exijam registro regulamentado.');
+  body += wLn();
+
+  body += cl('DA REMUNERAÇÃO FIXA');
+  body += wPar(`4.1 Pelos serviços entregues conforme o Anexo Técnico, a CONTRATANTE pagará à CONTRATADA o valor fixo mensal de R$ ${g('rem_valor')} (${g('rem_extenso')}).`);
+  body += wPar('4.2 Este valor remunera exclusivamente o conjunto de entregas e produtos previstos no Anexo Técnico, não configurando salário, remuneração por tempo à disposição ou verba de natureza trabalhista.');
+  body += wPar(`4.3 O pagamento será realizado no dia ${g('rem_dia')} do mês subsequente, condicionado a: (a) entrega e aprovação de todos os produtos previstos no Anexo Técnico; e (b) emissão da respectiva Nota Fiscal pela CONTRATADA, compatível com seu CNAE vigente.`);
+  body += wPar('4.4 A CONTRATANTE manterá registro formal dos entregáveis aprovados e notas fiscais recebidas em cada ciclo, formando histórico de due diligence contratual.');
+  body += wLn();
+
+  if(chk('opt_var')) {
+    body += cl('DA REMUNERAÇÃO VARIÁVEL POR RESULTADOS');
+    body += wPar(`5.1 Além da remuneração fixa, poderá a CONTRATADA fazer jus a bônus variável atrelado a ${g('var_meta')||'metas de eficiência operacional'}, cujos critérios objetivos serão pactuados em Termo Aditivo específico, a celebrar-se em até ${g('var_prazo')||'60'} dias da assinatura.`);
+    body += wPar('5.2 O bônus variável possui natureza de prestação civil por resultado, não configurando salário variável, comissão ou verba trabalhista. Sua percepção eventual não gera direito adquirido a pagamentos futuros.');
+    body += wLn();
+  }
+
+  const nC = chk('opt_var')?6:5;
+  body += cl('DO COMPLIANCE, REGULARIDADE E QUARENTENA');
+  body += wPar(`${nC}.1 A CONTRATADA declara, sob as penas da lei: (a) possuir regularidade fiscal e previdenciária; (b) não ter prestado serviços à CONTRATANTE com vínculo celetista nos últimos 18 meses${chk('opt_quarentena')?', declarando que o vínculo anterior foi encerrado em '+formatarData(g('quarentena_data'))+', cumprido o período de quarentena do art. 5.º-C da Lei nº 6.019/1974':''}; e (c) possuir CNAE vigente compatível com o objeto deste contrato.`);
+  body += wPar(`${nC}.2 A falsidade de qualquer dessas declarações constitui falta grave e autoriza rescisão imediata, sujeitando a CONTRATADA ao ressarcimento integral de eventuais condenações suportadas pela CONTRATANTE.`);
+  body += wPar(`${nC}.3 A CONTRATANTE exigirá mensalmente, antes do pagamento, comprovantes de regularidade fiscal, previdenciária e junto ao conselho de classe competente, documentando o recebimento para cumprimento do dever de fiscalização (culpa in vigilando — STF, ADPF 324).`);
+  body += wLn();
+
+  const nR = nC+1;
+  body += cl('DA RESPONSABILIDADE CIVIL E REGRESSO');
+  body += wPar(`${nR}.1 A CONTRATADA é exclusiva responsável pelos danos causados a terceiros em decorrência do exercício de suas atividades técnicas, não respondendo a CONTRATANTE solidariamente por tais atos.`);
+  body += wPar(`${nR}.2 Caso a CONTRATANTE seja demandada judicialmente ou administrativamente — inclusive na Justiça do Trabalho — por ato ou omissão imputável à CONTRATADA, esta ressarcirá integralmente a CONTRATANTE de todos os valores despendidos, incluindo condenações, honorários advocatícios, custas e encargos de sucumbência, na forma de obrigação autônoma, líquida e exigível independentemente de liquidação por arbitramento.`);
+  body += wPar(`${nR}.3 A CONTRATANTE responderá subsidiariamente pelas obrigações legais decorrentes da execução, exclusivamente quando configurada culpa in vigilando (art. 5.º-A, § 5.º, Lei nº 6.019/1974).`);
+  body += wLn();
+
+  if(chk('opt_vis')) {
+    body += cl('DA EXECUÇÃO REMOTA E DAS VISITAS PRESENCIAIS');
+    body += wPar('O cumprimento do objeto dar-se-á, como regra, de forma remota. Visitas presenciais ocorrerão em caráter excepcional — '+( g('vis_freq')||'conforme necessidade técnica')+' — sendo o agendamento organizado exclusivamente pela CONTRATADA.');
+    body += wPar('É expressamente vedado aos prepostos da CONTRATANTE: (a) exigir comparecimento diário; (b) estabelecer horários fixos; e (c) exercer controle de ponto ou jornada sobre a CONTRATADA.');
+    body += wLn();
+  }
+
+  body += cl('DA PROPRIEDADE INTELECTUAL DOS ENTREGÁVEIS');
+  body += wPar('Todos os laudos, relatórios, planilhas, manuais e demais produtos elaborados pela CONTRATADA no âmbito deste contrato são cedidos à CONTRATANTE de forma plena, irrevogável e definitiva, mediante o pagamento da remuneração contratual (arts. 49 e 50, Lei nº 9.610/1998). A cessão abrange uso, reprodução, modificação e distribuição, preservados os direitos morais da CONTRATADA.');
+  body += wLn();
+
+  body += cl('DA CONFIDENCIALIDADE E NÃO UTILIZAÇÃO COMPETITIVA');
+  body += wPar('A CONTRATADA obriga-se a manter absoluto sigilo sobre informações confidenciais da CONTRATANTE acessadas em decorrência deste contrato, incluindo dados financeiros, operacionais, estratégicos e de clientes.');
+  body += wPar('A obrigação de sigilo persiste por 3 (três) anos após o término. A vedação de não utilização competitiva abrange especificamente o uso de informações confidenciais para beneficiar concorrentes diretos da CONTRATANTE.');
+  body += wPar('A violação desta cláusula sujeita a infratora ao pagamento de multa equivalente a 6 (seis) mensalidades do valor contratual, sem prejuízo de reparação de danos adicionais comprovados e da tutela inibitória do art. 497, parágrafo único, do CPC.');
+  body += wLn();
+
+  body += cl('DAS DECLARAÇÕES E GARANTIAS RECÍPROCAS');
+  body += wPar('Cada parte declara e garante à outra que: (a) tem plena capacidade jurídica para celebrar este contrato; (b) não existe impedimento legal, judicial, administrativo ou regulatório que inviabilize o cumprimento das obrigações assumidas; (c) as informações prestadas são verdadeiras; e (d) o instrumento foi livremente negociado, sem coação, dolo ou erro.');
+  body += wPar('A falsidade de qualquer dessas declarações confere à parte prejudicada o direito de rescisão imediata com apuração de perdas e danos.');
+  body += wLn();
+
+  if(chk('opt_hab')) {
+    body += cl('DA HABILITAÇÃO PROFISSIONAL');
+    body += wPar(`A CONTRATADA declara possuir habilitação profissional regular e ativa perante ${g('hab_conselho')||'o conselho de classe competente'}, comprometendo-se a apresentar comprovante de regularidade sempre que solicitado. A suspensão ou cassação do registro constitui falta grave, autorizando rescisão imediata.`);
+    body += wLn();
+  }
+
+  body += cl('DA VIGÊNCIA E DA RESCISÃO');
+  body += wPar(vigTexto);
+  body += wPar(`Rescisão imotivada: qualquer das partes poderá resilir o contrato mediante aviso prévio escrito com antecedência mínima de ${g('vig_aviso')||'30'} dias. O descumprimento do prazo de aviso prévio pela CONTRATANTE enseja cláusula penal compensatória equivalente a 1 (uma) mensalidade de honorários.`);
+  body += wPar(`Rescisão por falta grave: (a) prática de fraude ou dolo; (b) violação da confidencialidade; (c) descumprimento reiterado dos prazos do Anexo Técnico; (d) falsidade das declarações e garantias prestadas; ${chk('opt_hab')?'(e) suspensão da habilitação perante '+g('hab_conselho')+'; ':''}(${chk('opt_hab')?'f':'e'}) prática de atos que importem descrédito comercial ou moral da outra parte.`);
+  body += wLn();
+
+  body += cl('DA MEDIAÇÃO PRÉVIA E DO FORO');
+  body += wPar('As partes elegem a mediação prévia obrigatória (Lei nº 13.140/2015) como condição de procedibilidade para quaisquer litígios civis decorrentes deste contrato, ressalvados os casos de urgência cautelar. Esta cláusula não se aplica a reclamações perante a Justiça do Trabalho.');
+  body += wPar(`Não havendo acordo na mediação, fica eleito o Foro da Comarca de ${g('foro_cidade')}/${g('foro_uf')}, com renúncia expressa a qualquer outro, nos termos do art. 63 do CPC.`);
+  body += wLn(); body += wLn();
+  body += wPar('E, por estarem justas e contratadas, assinam o presente em 02 (duas) vias de igual teor e forma.');
+  body += wLn();
+  body += wPar(`${g('foro_cidade')}/${g('foro_uf')}, ${formatarData(g('vig_inicio'))}.`);
+  body += wLn(); body += wLn();
+  body += wPar('_________________________________________________', {center:true});
+  body += wPar(g('cont_nome'), {center:true});
+  body += wPar('CONTRATANTE', {center:true});
+  body += wLn(); body += wLn();
+  body += wPar('_________________________________________________', {center:true});
+  body += wPar(g('ctda_nome'), {center:true});
+  body += wPar('CONTRATADA', {center:true});
+  body += wLn(); body += wLn();
+  body += wPar('Testemunhas:', {bold:true});
+  body += wLn();
+  body += wPar('Nome: ________________________________________ CPF: _______________________');
+  body += wPar('Nome: ________________________________________ CPF: _______________________');
+
+  // Montar DOCX (ZIP com XML)
+  const docXml = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<w:document xmlns:wpc="http://schemas.microsoft.com/office/word/2010/wordprocessingCanvas"
+  xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+  xmlns:o="urn:schemas-microsoft-com:office:office"
+  xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"
+  xmlns:m="http://schemas.openxmlformats.org/officeDocument/2006/math"
+  xmlns:v="urn:schemas-microsoft-com:vml"
+  xmlns:wp14="http://schemas.microsoft.com/office/word/2010/wordprocessingDrawing"
+  xmlns:wp="http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing"
+  xmlns:w10="urn:schemas-microsoft-com:office:word"
+  xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"
+  xmlns:w14="http://schemas.microsoft.com/office/word/2010/wordml"
+  xmlns:wpg="http://schemas.microsoft.com/office/word/2010/wordprocessingGroup"
+  xmlns:wpi="http://schemas.microsoft.com/office/word/2010/wordprocessingInk"
+  xmlns:wne="http://schemas.microsoft.com/office/word/2006/wordml"
+  xmlns:wps="http://schemas.microsoft.com/office/word/2010/wordprocessingShape"
+  mc:Ignorable="w14 wp14">
+<w:body>
+<w:sectPr>
+  <w:pgSz w:w="11906" w:h="16838"/>
+  <w:pgMar w:top="1418" w:right="1134" w:bottom="1418" w:left="1701" w:header="709" w:footer="709" w:gutter="0"/>
+</w:sectPr>
+${body}
+</w:body></w:document>`;
+
+  const relsXml = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
+  <Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/>
+</Relationships>`;
+
+  const stylesXml = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<w:styles xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">
+  <w:docDefaults><w:rPrDefault><w:rPr>
+    <w:rFonts w:ascii="Arial" w:hAnsi="Arial" w:cs="Arial"/>
+    <w:sz w:val="24"/><w:szCs w:val="24"/>
+    <w:lang w:val="pt-BR"/>
+  </w:rPr></w:rPrDefault></w:docDefaults>
+</w:styles>`;
+
+  const appXml = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Properties xmlns="http://schemas.openxmlformats.org/officeDocument/2006/extended-properties">
+  <Application>Gerador Contrato PJ</Application>
+</Properties>`;
+
+  const contentTypes = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">
+  <Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>
+  <Default Extension="xml" ContentType="application/xml"/>
+  <Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/>
+  <Override PartName="/word/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.styles+xml"/>
+  <Override PartName="/docProps/app.xml" ContentType="application/vnd.openxmlformats-officedocument.extended-properties+xml"/>
+</Types>`;
+
+  const rootRels = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
+  <Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/>
+  <Relationship Id="rId2" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/extended-properties" Target="docProps/app.xml"/>
+</Relationships>`;
+
+  // Usar JSZip via CDN (carregado inline só aqui via importação dinâmica)
+  // Como não temos JSZip, vamos usar uma implementação mínima de ZIP em JS puro
+  const zip = criarZip();
+  zip.add('[Content_Types].xml', contentTypes);
+  zip.add('_rels/.rels', rootRels);
+  zip.add('word/document.xml', docXml);
+  zip.add('word/styles.xml', stylesXml);
+  zip.add('word/_rels/document.xml.rels', relsXml);
+  zip.add('docProps/app.xml', appXml);
+
+  const blob = zip.toBlob();
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  const nomeArq = `Contrato_PJ_${g('ctda_nome').replace(/\s+/g,'_').slice(0,30)}_${new Date().toISOString().slice(0,10)}.docx`;
+  a.href = url; a.download = nomeArq; document.body.appendChild(a); a.click();
+  setTimeout(()=>{ document.body.removeChild(a); URL.revokeObjectURL(url); }, 1000);
+
+  salvarHistorico(g('cont_nome'), g('ctda_nome'), nomeArq);
+}
+
+// ── ZIP PURO EM JS (sem dependência) ──
+function criarZip() {
+  const files = [];
+  function strToBytes(str) {
+    return new TextEncoder().encode(str);
+  }
+  function crc32(buf) {
+    let c = 0xFFFFFFFF;
+    const t = new Uint32Array(256);
+    for(let i=0;i<256;i++){let n=i;for(let k=0;k<8;k++)n=n&1?0xEDB88320^(n>>>1):n>>>1;t[i]=n;}
+    for(let i=0;i<buf.length;i++)c=t[(c^buf[i])&0xFF]^(c>>>8);
+    return (c^0xFFFFFFFF)>>>0;
+  }
+  function u16(n){return [n&0xFF,(n>>8)&0xFF];}
+  function u32(n){return [n&0xFF,(n>>8)&0xFF,(n>>16)&0xFF,(n>>24)&0xFF];}
+  function concat(...arrays){
+    const len=arrays.reduce((a,b)=>a+b.length,0);
+    const r=new Uint8Array(len);let o=0;
+    for(const a of arrays){r.set(a,o);o+=a.length;}
+    return r;
+  }
+  return {
+    add(name,content){files.push({name,content});},
+    toBlob(){
+      const enc=new TextEncoder();
+      const localHeaders=[];
+      const centralDirs=[];
+      let offset=0;
+      for(const f of files){
+        const nameB=enc.encode(f.name);
+        const dataB=enc.encode(f.content);
+        const crc=crc32(dataB);
+        const lh=concat(
+          new Uint8Array([0x50,0x4B,0x03,0x04]),
+          new Uint8Array([0x14,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00]),
+          new Uint8Array(u32(crc)),
+          new Uint8Array(u32(dataB.length)),
+          new Uint8Array(u32(dataB.length)),
+          new Uint8Array(u16(nameB.length)),
+          new Uint8Array([0x00,0x00]),
+          nameB,dataB
+        );
+        const cd=concat(
+          new Uint8Array([0x50,0x4B,0x01,0x02]),
+          new Uint8Array([0x14,0x00,0x14,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00]),
+          new Uint8Array(u32(crc)),
+          new Uint8Array(u32(dataB.length)),
+          new Uint8Array(u32(dataB.length)),
+          new Uint8Array(u16(nameB.length)),
+          new Uint8Array([0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00]),
+          new Uint8Array(u32(offset)),
+          nameB
+        );
+        localHeaders.push(lh);
+        centralDirs.push(cd);
+        offset+=lh.length;
+      }
+      const cdOffset=offset;
+      const cdSize=centralDirs.reduce((a,b)=>a+b.length,0);
+      const eocd=concat(
+        new Uint8Array([0x50,0x4B,0x05,0x06,0x00,0x00,0x00,0x00]),
+        new Uint8Array(u16(files.length)),
+        new Uint8Array(u16(files.length)),
+        new Uint8Array(u32(cdSize)),
+        new Uint8Array(u32(cdOffset)),
+        new Uint8Array([0x00,0x00])
+      );
+      const all=concat(...localHeaders,...centralDirs,eocd);
+      return new Blob([all],{type:'application/vnd.openxmlformats-officedocument.wordprocessingml.document'});
+    }
+  };
+}
+
+// ── HISTÓRICO (localStorage) ──
+function salvarHistorico(contratante, contratada, arquivo) {
+  const h = JSON.parse(localStorage.getItem('historico_contratos') || '[]');
+  h.unshift({ contratante, contratada, arquivo, data: new Date().toLocaleString('pt-BR') });
+  if (h.length > 20) h.pop();
+  localStorage.setItem('historico_contratos', JSON.stringify(h));
+  carregarHistorico();
+}
+function carregarHistorico() {
+  const h = JSON.parse(localStorage.getItem('historico_contratos') || '[]');
+  const el = document.getElementById('historico-lista');
+  if (!el) return;
+  if (!h.length) { el.innerHTML = '<p style="font-size:13px;color:#aaa">Nenhum contrato gerado ainda.</p>'; return; }
+  el.innerHTML = h.map(item => `
+    <div class="historico-item">
+      <div class="historico-info">
+        <div class="historico-nome">${item.contratada} → ${item.contratante}</div>
+        <div class="historico-data">${item.data} — ${item.arquivo}</div>
+      </div>
+    </div>
+  `).join('');
+}
+function limparHistorico() {
+  if (confirm('Deseja apagar todo o histórico de contratos gerados?')) {
+    localStorage.removeItem('historico_contratos');
+    carregarHistorico();
+  }
+}
+</script>
+</body>
+</html>
