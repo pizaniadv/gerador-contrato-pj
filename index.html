@@ -432,6 +432,21 @@
         <input class="campo-input" id="ctda_qual" placeholder="Ex.: Microempreendedora Individual (MEI)">
       </div>
 
+      <div class="row-2">
+        <div class="campo-grupo">
+          <div class="campo-label">Nome do Responsável Legal <span class="tag-opcional">(opcional)</span>
+            <div class="tooltip-wrap"><button class="tooltip-btn">?</button><div class="tooltip-box">Nome da pessoa que assina contratos pela empresa contratada. Para MEI, geralmente é o próprio titular. Para Ltda, é o sócio-administrador.</div></div>
+          </div>
+          <input class="campo-input" id="ctda_rep" placeholder="Ex.: João da Silva">
+        </div>
+        <div class="campo-grupo">
+          <div class="campo-label">Cargo do Responsável <span class="tag-opcional">(opcional)</span>
+            <div class="tooltip-wrap"><button class="tooltip-btn">?</button><div class="tooltip-box">Cargo do signatário. Exemplos: Administrador, Sócio-Gerente, Titular (para MEI).</div></div>
+          </div>
+          <input class="campo-input" id="ctda_rep_cargo" placeholder="Ex.: Administrador, Titular">
+        </div>
+      </div>
+
       <div class="secao-titulo">Endereço da Contratada</div>
       <div class="campo-grupo">
         <div class="campo-label">CEP <span class="obrig">*</span></div>
@@ -1131,7 +1146,7 @@ function gerarHTMLContrato() {
 <div class="partes">
 <p><strong>CONTRATANTE:</strong> ${g('cont_nome')}, pessoa jurídica de direito privado, inscrita no CNPJ sob o nº ${g('cont_cnpj')}, com sede em ${endCont}, neste ato representada por seu ${g('cont_rep_cargo')}, ${g('cont_rep')}, portador do CPF nº ${g('cont_rep_cpf')}.</p>
 <br>
-<p><strong>CONTRATADA:</strong> ${g('ctda_nome')}, ${g('ctda_qual')}, inscrita no CNPJ sob o nº ${g('ctda_cnpj')}, com sede em ${endCtda}.</p>
+<p><strong>CONTRATADA:</strong> ${g('ctda_nome')}, ${g('ctda_qual')}, inscrita no CNPJ sob o nº ${g('ctda_cnpj')}, com sede em ${endCtda}${g('ctda_rep') ? ', neste ato representada por seu ' + (g('ctda_rep_cargo')||'representante legal') + ', ' + g('ctda_rep') : ''}.</p>
 <br>
 <p>As partes acima qualificadas celebram o presente Contrato de Prestação de Serviços Técnicos, que se regerá pelas seguintes cláusulas e condições:</p>
 </div>`;
@@ -1278,7 +1293,7 @@ async function exportarDocx() {
   body += wLn();
   body += wParBold('CONTRATANTE: ', `${g('cont_nome')}, pessoa jurídica de direito privado, inscrita no CNPJ sob o nº ${g('cont_cnpj')}, com sede em ${endCont}, neste ato representada por seu ${g('cont_rep_cargo')}, ${g('cont_rep')}, portador do CPF nº ${g('cont_rep_cpf')}.`);
   body += wLn();
-  body += wParBold('CONTRATADA: ', `${g('ctda_nome')}, ${g('ctda_qual')}, inscrita no CNPJ sob o nº ${g('ctda_cnpj')}, com sede em ${endCtda}.`);
+  body += wParBold('CONTRATADA: ', `${g('ctda_nome')}, ${g('ctda_qual')}, inscrita no CNPJ sob o nº ${g('ctda_cnpj')}, com sede em ${endCtda}${g('ctda_rep') ? ', neste ato representada por seu ' + (g('ctda_rep_cargo')||'representante legal') + ', ' + g('ctda_rep') : ''}.`);
   body += wLn();
   body += wPar('As partes acima qualificadas celebram o presente Contrato de Prestação de Serviços Técnicos, que se regerá pelas seguintes cláusulas e condições:');
   body += wLn();
@@ -1538,7 +1553,7 @@ function criarZip() {
     }
   };
 }
- 
+
 // ── HISTÓRICO (localStorage) ──
 function salvarHistorico(contratante, contratada, arquivo) {
   const h = JSON.parse(localStorage.getItem('historico_contratos') || '[]');
