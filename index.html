@@ -616,7 +616,7 @@
           <div class="campo-label">Data de Início <span class="obrig">*</span>
             <div class="tooltip-wrap"><button class="tooltip-btn">?</button><div class="tooltip-box">Data em que o serviço começa. Normalmente é a data de assinatura do contrato.</div></div>
           </div>
-          <input class="campo-input" type="date" id="vig_inicio">
+          <input class="campo-input" type="date" id="vig_inicio" onchange="calcularVigFim()">
         </div>
         <div class="campo-grupo">
           <div class="campo-label">Tipo de Prazo <span class="obrig">*</span>
@@ -628,9 +628,22 @@
           </select>
         </div>
       </div>
-      <div class="campo-grupo" id="vig_fim_wrap" style="display:none">
-        <div class="campo-label">Data de Término <span class="obrig">*</span></div>
-        <input class="campo-input" type="date" id="vig_fim">
+      <div id="vig_fim_wrap" style="display:none">
+        <div class="row-2">
+          <div class="campo-grupo">
+            <div class="campo-label">Prazo em Meses <span class="obrig">*</span>
+              <div class="tooltip-wrap"><button class="tooltip-btn">?</button><div class="tooltip-box">Duração do contrato em meses. A data de término é calculada automaticamente pela regra início + N meses &minus; 1 dia. Ex.: início 01/09/2026 com 12 meses termina em 31/08/2027.</div></div>
+            </div>
+            <input class="campo-input" type="number" min="1" step="1" id="vig_meses" value="12" oninput="calcularVigFim()">
+          </div>
+          <div class="campo-grupo">
+            <div class="campo-label">Data de Término <span class="obrig">*</span>
+              <div class="tooltip-wrap"><button class="tooltip-btn">?</button><div class="tooltip-box">Preenchida automaticamente a partir da data de início e do prazo em meses. Pode ser ajustada à mão, mas precisa ser posterior à data de início.</div></div>
+            </div>
+            <input class="campo-input" type="date" id="vig_fim">
+            <div class="campo-hint" id="hint-vig-fim"></div>
+          </div>
+        </div>
       </div>
       <div class="campo-grupo">
         <div class="campo-label">Aviso Prévio para Rescisão (dias) <span class="obrig">*</span>
@@ -978,6 +991,22 @@ function validarEtapa(n) {
     el.classList.toggle('erro', vazio);
     if (vazio) ok = false;
   });
+  if (n === 3 && document.getElementById('vig_tipo').value === 'determinado') {
+    const ini = document.getElementById('vig_inicio');
+    const fim = document.getElementById('vig_fim');
+    const mes = document.getElementById('vig_meses');
+    const mesRuim = !mes || !String(mes.value).trim() || !(parseInt(mes.value, 10) > 0);
+    if (mes) mes.classList.toggle('erro', mesRuim);
+    if (mesRuim) ok = false;
+    const semFim = !fim || !String(fim.value).trim();
+    const fimAntes = !semFim && ini && ini.value && fim.value <= ini.value;
+    if (fim) fim.classList.toggle('erro', semFim || fimAntes);
+    if (semFim || fimAntes) ok = false;
+    if (fimAntes) {
+      alert('A data de término (' + formatarData(fim.value) + ') não pode ser anterior nem igual à data de início (' + formatarData(ini.value) + '). Confira o prazo em meses.');
+      return false;
+    }
+  }
   if (!ok) {
     alert('Por favor, preencha todos os campos obrigatórios (marcados com *).');
   }
@@ -1136,6 +1165,46 @@ function toggleBloco(id) {
 function toggleVigFim() {
   const tipo = document.getElementById('vig_tipo').value;
   document.getElementById('vig_fim_wrap').style.display = tipo === 'determinado' ? 'block' : 'none';
+  if (tipo === 'determinado') calcularVigFim();
+}
+// Termo final do prazo determinado = inicio + N meses - 1 dia.
+// Ex.: 2026-09-01 + 12 meses => 2027-09-01 - 1 dia => 2027-08-31.
+function calcVigFim(inicioISO, meses) {
+  if (!inicioISO) return '';
+  const p = String(inicioISO).split('-').map(Number);
+  if (p.length !== 3 || p.some(isNaN)) return '';
+  const n = parseInt(meses, 10);
+  if (!isFinite(n) || n <= 0) return '';
+  const y = p[0], m = p[1], d = p[2];
+  const total = (m - 1) + n;
+  const ay = y + Math.floor(total / 12);
+  const am = total % 12;
+  const ultimo = new Date(Date.UTC(ay, am + 1, 0)).getUTCDate();
+  let dt;
+  if (d > ultimo) {
+    // Sem correspondencia exata de dia no mes final (ex.: 31/01 + 1 mes):
+    // o termo expira no ultimo dia do mes (CC art. 132, par. 3).
+    dt = new Date(Date.UTC(ay, am, ultimo));
+  } else {
+    dt = new Date(Date.UTC(ay, am, d));
+    dt.setUTCDate(dt.getUTCDate() - 1);
+  }
+  return dt.toISOString().slice(0, 10);
+}
+function calcularVigFim() {
+  const ini = document.getElementById('vig_inicio');
+  const mes = document.getElementById('vig_meses');
+  const fim = document.getElementById('vig_fim');
+  const hint = document.getElementById('hint-vig-fim');
+  if (!ini || !mes || !fim) return;
+  const calc = calcVigFim(ini.value, mes.value);
+  if (calc) {
+    fim.value = calc;
+    fim.classList.remove('erro');
+    if (hint) hint.textContent = 'Calculado: início + ' + parseInt(mes.value, 10) + ' meses \u2212 1 dia = ' + formatarData(calc) + '.';
+  } else if (hint) {
+    hint.textContent = '';
+  }
 }
 
 // ── EXTENSO (sugestão simples) ──
@@ -1322,9 +1391,9 @@ function gerarHTMLContrato() {
 
   const nComp = chk('opt_var')?6:5;
   html += cl('DO COMPLIANCE, REGULARIDADE E QUARENTENA',
-    `${nComp}.1 A CONTRATADA declara, sob as penas da lei: (a) possuir regularidade fiscal e previdenciária; (b) não ter prestado serviços à CONTRATANTE com vínculo celetista nos últimos 18 meses${chk('opt_quarentena')?', declarando que o vínculo anterior foi encerrado em '+formatarData(g('quarentena_data'))+', cumprido o período de quarentena do art. 5.º-C da Lei nº 6.019/1974':''}; e (c) possuir CNAE vigente compatível com o objeto deste contrato.`,
+    `${nComp}.1 A CONTRATADA declara, sob as penas da lei: (a) possuir regularidade fiscal e previdenciária; (b) que seus titulares ou sócios não prestaram serviços à CONTRATANTE, nos últimos 18 (dezoito) meses, na qualidade de empregado ou de trabalhador sem vínculo empregatício, ressalvada a hipótese de titular ou sócio aposentado (art. 5.º-C da Lei nº 6.019/1974)${chk('opt_quarentena')?', registrando que a prestação anterior foi encerrada em '+formatarData(g('quarentena_data'))+', já decorrido o prazo de 18 (dezoito) meses':''}; (c) que não alocará na execução deste contrato empregado demitido pela CONTRATANTE antes do decurso do prazo de 18 (dezoito) meses contados da respectiva demissão (art. 5.º-D da Lei nº 6.019/1974); e (d) possuir CNAE vigente compatível com o objeto deste contrato.`,
     `${nComp}.2 A falsidade de qualquer dessas declarações constitui falta grave e autoriza rescisão imediata, sujeitando a CONTRATADA ao ressarcimento integral de eventuais condenações suportadas pela CONTRATANTE.`,
-    `${nComp}.3 A CONTRATANTE exigirá mensalmente, antes do pagamento, comprovantes de regularidade fiscal, previdenciária e junto ao conselho de classe competente, documentando o recebimento para cumprimento do dever de fiscalização (culpa in vigilando — STF, ADPF 324).`
+    `${nComp}.3 A CONTRATANTE exigirá mensalmente, antes do pagamento, comprovantes de regularidade fiscal e previdenciária e, quando a atividade contratada estiver sujeita a conselho profissional, também o comprovante de regularidade perante o conselho de classe competente, documentando o recebimento para cumprimento do dever de fiscalização (culpa in vigilando — STF, ADPF 324).`
   );
 
   const nResp = nComp+1;
@@ -1480,9 +1549,9 @@ async function exportarDocx() {
 
   const nC = chk('opt_var')?6:5;
   body += cl('DO COMPLIANCE, REGULARIDADE E QUARENTENA');
-  body += wPar(`${nC}.1 A CONTRATADA declara, sob as penas da lei: (a) possuir regularidade fiscal e previdenciária; (b) não ter prestado serviços à CONTRATANTE com vínculo celetista nos últimos 18 meses${chk('opt_quarentena')?', declarando que o vínculo anterior foi encerrado em '+formatarData(g('quarentena_data'))+', cumprido o período de quarentena do art. 5.º-C da Lei nº 6.019/1974':''}; e (c) possuir CNAE vigente compatível com o objeto deste contrato.`);
+  body += wPar(`${nC}.1 A CONTRATADA declara, sob as penas da lei: (a) possuir regularidade fiscal e previdenciária; (b) que seus titulares ou sócios não prestaram serviços à CONTRATANTE, nos últimos 18 (dezoito) meses, na qualidade de empregado ou de trabalhador sem vínculo empregatício, ressalvada a hipótese de titular ou sócio aposentado (art. 5.º-C da Lei nº 6.019/1974)${chk('opt_quarentena')?', registrando que a prestação anterior foi encerrada em '+formatarData(g('quarentena_data'))+', já decorrido o prazo de 18 (dezoito) meses':''}; (c) que não alocará na execução deste contrato empregado demitido pela CONTRATANTE antes do decurso do prazo de 18 (dezoito) meses contados da respectiva demissão (art. 5.º-D da Lei nº 6.019/1974); e (d) possuir CNAE vigente compatível com o objeto deste contrato.`);
   body += wPar(`${nC}.2 A falsidade de qualquer dessas declarações constitui falta grave e autoriza rescisão imediata, sujeitando a CONTRATADA ao ressarcimento integral de eventuais condenações suportadas pela CONTRATANTE.`);
-  body += wPar(`${nC}.3 A CONTRATANTE exigirá mensalmente, antes do pagamento, comprovantes de regularidade fiscal, previdenciária e junto ao conselho de classe competente, documentando o recebimento para cumprimento do dever de fiscalização (culpa in vigilando — STF, ADPF 324).`);
+  body += wPar(`${nC}.3 A CONTRATANTE exigirá mensalmente, antes do pagamento, comprovantes de regularidade fiscal e previdenciária e, quando a atividade contratada estiver sujeita a conselho profissional, também o comprovante de regularidade perante o conselho de classe competente, documentando o recebimento para cumprimento do dever de fiscalização (culpa in vigilando — STF, ADPF 324).`);
   body += wLn();
 
   const nR = nC+1;
