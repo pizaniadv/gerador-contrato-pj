@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Gerador de Contrato PJ</title>
+<title>Gerador de Contrato PJ — v2.0 · Raphael Pizani Advocacia</title>
 <!-- docx gerado via XML puro, sem dependência externa -->
 <style>
   /* ── RESET & BASE ── */
@@ -288,6 +288,17 @@
 
   .tag-opcional { font-size: 11px; color: #888; font-weight: 400; margin-left: 6px; }
   .secao-titulo { font-size: 13px; font-weight: 700; color: var(--azul); margin: 18px 0 10px; text-transform: uppercase; letter-spacing: .04em; border-left: 3px solid var(--vermelho); padding-left: 10px; }
+
+  /* ── SEMÁFORO DE RISCO ── */
+  .semaforo { border-radius: 10px; padding: 16px 20px; margin-bottom: 18px; border: 1.5px solid; }
+  .semaforo h4 { font-size: 14px; margin-bottom: 6px; display: flex; align-items: center; gap: 8px; }
+  .semaforo p { font-size: 13px; line-height: 1.6; margin: 4px 0; }
+  .semaforo ul { margin: 8px 0 0 18px; font-size: 12.5px; line-height: 1.65; }
+  .semaforo.verde { background: #eaf6ee; border-color: #2d6a4f; color: #1b4332; }
+  .semaforo.amarelo { background: #fdf6e3; border-color: #c9a84c; color: #7c4f00; }
+  .semaforo.vermelho { background: #fbeaea; border-color: #8b2a2a; color: #7a1f1f; }
+  .risco-nota { font-size: 12.5px; color: #8b2a2a; margin-top: 6px; padding: 8px 12px; background: #fbeaea; border-radius: 6px; border-left: 3px solid #8b2a2a; display: none; }
+  .risco-nota.on { display: block; }
 </style>
 </head>
 <body>
@@ -307,15 +318,15 @@
           </div>
         </div>
         <div class="login-apresentacao">
-          <h2>Gerador de Contratos PJ — Projeto Piloto</h2>
-          <p>Esta ferramenta foi desenvolvida pelo escritório <strong>Raphael Pizani Advocacia</strong> para automatizar a geração de contratos de prestação de serviços técnicos com segurança jurídica e eficiência operacional.</p>
-          <p>O modelo contratual embutido neste sistema foi construído com base em jurisprudência consolidada do STF e STJ, incorporando as mais robustas proteções contra reconhecimento de vínculo empregatício disponíveis no ordenamento jurídico brasileiro.</p>
+          <h2>Gerador de Contratos PJ — v2.0</h2>
+          <p>Ferramenta do escritório <strong>Raphael Pizani Advocacia</strong> para gerar contratos de prestação de serviços técnicos com <strong>máxima blindagem da empresa contratante</strong> contra o reconhecimento de vínculo empregatício.</p>
+          <p>O modelo é ancorado na tese do STF na <strong>ADPF 324 e no Tema 725</strong> (licitude de formas alternativas de organização do trabalho) e reforçado pelos marcadores de autonomia que a Justiça do Trabalho exige para afastar a pejotização fraudulenta.</p>
           <ul class="login-features">
-            <li>Geração automática de contrato PJ com 14 cláusulas de proteção</li>
-            <li>Busca automática de CNPJ (Receita Federal) e CEP (Correios)</li>
-            <li>Blocos opcionais: remuneração variável, visitas presenciais, habilitação profissional e subcontratação</li>
-            <li>Exportação em Word (.docx) e PDF com logo da empresa</li>
-            <li>Histórico de contratos gerados salvo localmente</li>
+            <li><strong>Objeto por entregáveis</strong> — evita descrever um "cargo", principal gatilho de vínculo</li>
+            <li><strong>Semáforo de risco de pejotização</strong> — alerta antes de gerar um contrato perigoso</li>
+            <li>Marcadores de autonomia: substituibilidade, meios próprios e ausência de exclusividade</li>
+            <li>Reembolso de despesas por lastro documental (sem "ajuda de custo" fixa disfarçada de salário)</li>
+            <li>Busca automática de CNPJ e CEP · Exportação em Word (.docx) e PDF com logo</li>
             <li>Todo documento gerado deve ser validado pelo advogado responsável antes da assinatura</li>
           </ul>
         </div>
@@ -597,10 +608,24 @@
       <p class="descricao-etapa">Descreva o que será feito, onde e por quanto tempo. Quanto mais específico, melhor a proteção jurídica da empresa.</p>
 
       <div class="campo-grupo">
-        <div class="campo-label">Descrição do Serviço <span class="obrig">*</span>
-          <div class="tooltip-wrap"><button class="tooltip-btn">?</button><div class="tooltip-box">Descreva brevemente o serviço a ser prestado. Exemplos: "assessoria técnica em controle de qualidade alimentar", "consultoria contábil e fiscal", "desenvolvimento de sistemas de TI". Seja específico — contratos vagos são mais fáceis de contestar na Justiça.</div></div>
+        <div class="campo-label">Natureza técnica do serviço <span class="obrig">*</span>
+          <div class="tooltip-wrap"><button class="tooltip-btn">?</button><div class="tooltip-box">Descreva o SERVIÇO técnico (uma atividade), NÃO um cargo. Certo: "assessoria técnica em gestão de compras e controle de custos (CMV)". Errado: "coordenador de supply responsável pela equipe". Descrever um cargo é o principal gatilho de reconhecimento de vínculo.</div></div>
         </div>
-        <textarea class="campo-textarea" id="obj_desc" placeholder="Ex.: prestação de serviços técnicos de assessoria, auditoria e controle de qualidade na área de alimentação"></textarea>
+        <textarea class="campo-textarea" id="obj_desc" placeholder="Ex.: serviços técnicos de assessoria e auditoria em gestão de compras, estoques e controle de custos (CMV)" oninput="detectarCargo()"></textarea>
+        <div class="risco-nota" id="aviso-cargo">⚠️ Este texto descreve um <strong>cargo/função</strong> (palavras como coordenador, gerente, equipe, jornada). A Justiça do Trabalho lê isso como emprego. Reescreva como <strong>serviço/atividade técnica</strong> e detalhe os produtos no campo abaixo.</div>
+      </div>
+
+      <div class="campo-grupo">
+        <div class="campo-label">Entregáveis (produtos do serviço) <span class="obrig">*</span>
+          <div class="tooltip-wrap"><button class="tooltip-btn">?</button><div class="tooltip-box">Liste os PRODUTOS concretos que a contratada entrega — é isso que remunera o contrato e afasta a ideia de "estar à disposição". Ex.: relatório mensal de CMV, plano de ação de redução de perdas, laudo de auditoria de estoque, mapa de fornecedores.</div></div>
+        </div>
+        <textarea class="campo-textarea" id="obj_entregaveis" placeholder="Ex.: relatório mensal de CMV; plano de ação de redução de perdas; laudo de auditoria de estoque; parametrização de estoques mínimos/máximos" oninput="detectarCargo()"></textarea>
+        <div class="campo-hint">Serão referidos como o núcleo do Anexo Técnico. Separe por ponto e vírgula.</div>
+      </div>
+
+      <div class="campo-grupo">
+        <div class="campo-label">Periodicidade das entregas <span class="tag-opcional">(opcional)</span></div>
+        <input class="campo-input" id="obj_period" placeholder="Ex.: mensal, com fechamento até o 5º dia útil" style="max-width:380px">
       </div>
 
       <div class="campo-grupo">
@@ -725,6 +750,32 @@
         </div>
       </div>
 
+      <!-- BLOCO OPCIONAL: Reembolso de despesas -->
+      <div class="bloco-opcional">
+        <div class="bloco-header" onclick="toggleBloco('reemb')">
+          <div>
+            <div class="bloco-titulo">Reembolso de Despesas <span class="bloco-badge">OPCIONAL</span></div>
+            <div class="bloco-subtitulo">Ative se a empresa for ressarcir gastos do prestador. Substitui com segurança a antiga "ajuda de custo".</div>
+          </div>
+          <label class="switch" onclick="event.stopPropagation()">
+            <input type="checkbox" id="opt_reemb" onchange="toggleBloco('reemb')">
+            <span class="switch-slider"></span>
+          </label>
+        </div>
+        <div class="bloco-conteudo" id="bloco-reemb">
+          <div class="aviso-isencao" style="margin-bottom:12px">
+            <strong>Por que não usar "ajuda de custo" fixa</strong>
+            Um valor mensal fixo, sem comprovação de gasto, é lido pela Justiça como salário disfarçado (art. 457, §2º, da CLT + STJ). Aqui o reembolso é <strong>somente contra nota/recibo de despesa efetiva</strong> — natureza indenizatória de verdade.
+          </div>
+          <div class="campo-grupo">
+            <div class="campo-label">Tipos de despesa reembolsável
+              <div class="tooltip-wrap"><button class="tooltip-btn">?</button><div class="tooltip-box">Ex.: deslocamento/combustível para visitas às unidades, hospedagem em viagem a serviço, materiais adquiridos para a execução. Sempre mediante comprovante.</div></div>
+            </div>
+            <input class="campo-input" id="reemb_tipos" placeholder="Ex.: deslocamento e hospedagem em visitas técnicas às unidades">
+          </div>
+        </div>
+      </div>
+
       <div class="nav-btns">
         <button class="btn-voltar" onclick="voltar(4)">← Voltar</button>
         <button class="btn-avancar" onclick="avancar(4)">Próximo passo →</button>
@@ -733,8 +784,47 @@
 
     <!-- ── ETAPA 5: CLÁUSULAS OPCIONAIS ── -->
     <div id="etapa-5" class="card-etapa" style="display:none">
-      <h2>Passo 5 — Cláusulas Especiais</h2>
-      <p class="descricao-etapa">Ative apenas as cláusulas que se aplicam a este contrato. Em caso de dúvida, consulte o advogado responsável antes de ativar.</p>
+      <h2>Passo 5 — Cláusulas Especiais e Perfil de Risco</h2>
+      <p class="descricao-etapa">Ative os marcadores de autonomia (recomendados) e responda com honestidade o perfil de risco. Em caso de dúvida, consulte o advogado responsável antes de ativar.</p>
+
+      <div class="secao-titulo">Marcadores de Autonomia <span style="font-weight:400;text-transform:none;letter-spacing:0;font-size:12px;color:var(--verde)">(recomendados — reforçam a blindagem)</span></div>
+
+      <div class="bloco-opcional" style="border-style:solid;border-color:var(--verde)">
+        <div class="bloco-header" onclick="toggleBloco('subst')">
+          <div>
+            <div class="bloco-titulo">Substituibilidade <span class="bloco-badge" style="background:#eaf6ee;color:var(--verde)">RECOMENDADO</span></div>
+            <div class="bloco-subtitulo">A contratada pode se fazer substituir por outro profissional. Afasta a pessoalidade — um dos requisitos do vínculo.</div>
+          </div>
+          <label class="switch" onclick="event.stopPropagation()">
+            <input type="checkbox" id="opt_subst" onchange="toggleBloco('subst');renderSemaforo()">
+            <span class="switch-slider"></span>
+          </label>
+        </div>
+      </div>
+
+      <div class="bloco-opcional" style="border-style:solid;border-color:var(--verde)">
+        <div class="bloco-header" onclick="toggleBloco('risco')">
+          <div>
+            <div class="bloco-titulo">Meios próprios e risco do negócio <span class="bloco-badge" style="background:#eaf6ee;color:var(--verde)">RECOMENDADO</span></div>
+            <div class="bloco-subtitulo">A contratada usa seus próprios equipamentos e assume os riscos econômicos da atividade. Reforça a autonomia.</div>
+          </div>
+          <label class="switch" onclick="event.stopPropagation()">
+            <input type="checkbox" id="opt_risco" onchange="toggleBloco('risco');renderSemaforo()">
+            <span class="switch-slider"></span>
+          </label>
+        </div>
+      </div>
+
+      <div class="secao-titulo">Perfil de Risco <span style="font-weight:400;text-transform:none;letter-spacing:0;font-size:12px;color:#999">(uso interno — não entra no contrato)</span></div>
+      <p style="font-size:12.5px;color:var(--cinza-texto);margin:-4px 0 12px">Marque com honestidade o que acontece na prática. Isso não vai para o documento — serve para o semáforo avisar se o contrato é arriscado.</p>
+      <div class="bloco-opcional">
+        <label style="display:flex;align-items:flex-start;gap:8px;font-size:13px;cursor:pointer;margin-bottom:12px"><input type="checkbox" id="risk_exclusiv" onchange="renderSemaforo()"> A empresa exige exclusividade (o prestador só pode atender a ela)</label>
+        <label style="display:flex;align-items:flex-start;gap:8px;font-size:13px;cursor:pointer;margin-bottom:12px"><input type="checkbox" id="risk_jornada" onchange="renderSemaforo()"> Há controle de horário/jornada ou exigência de presença diária</label>
+        <label style="display:flex;align-items:flex-start;gap:8px;font-size:13px;cursor:pointer;margin-bottom:12px"><input type="checkbox" id="risk_equipe" onchange="renderSemaforo()"> O prestador chefia/dirige empregados da própria empresa contratante</label>
+        <label style="display:flex;align-items:flex-start;gap:8px;font-size:13px;cursor:pointer"><input type="checkbox" id="risk_porfora" onchange="renderSemaforo()"> Há pagamento "por fora" (sem nota fiscal) atrelado à produção</label>
+      </div>
+
+      <div class="secao-titulo">Cláusulas Opcionais</div>
 
       <!-- Visitas Presenciais -->
       <div class="bloco-opcional">
@@ -802,7 +892,7 @@
             <div class="bloco-subtitulo">Ative SOMENTE se a contratada já foi empregada (carteira assinada) desta empresa nos últimos 18 meses</div>
           </div>
           <label class="switch" onclick="event.stopPropagation()">
-            <input type="checkbox" id="opt_quarentena" onchange="toggleBloco('quarentena')">
+            <input type="checkbox" id="opt_quarentena" onchange="toggleBloco('quarentena');renderSemaforo()">
             <span class="switch-slider"></span>
           </label>
         </div>
@@ -815,7 +905,7 @@
             <div class="campo-label">Data de encerramento do vínculo CLT anterior
               <div class="tooltip-wrap"><button class="tooltip-btn">?</button><div class="tooltip-box">Data em que a pessoa foi demitida ou pediu demissão. Essa data será registrada no contrato como declaração da contratada.</div></div>
             </div>
-            <input class="campo-input" type="date" id="quarentena_data" style="max-width:200px">
+            <input class="campo-input" type="date" id="quarentena_data" style="max-width:200px" onchange="renderSemaforo()">
           </div>
         </div>
       </div>
@@ -829,7 +919,9 @@
     <!-- ── ETAPA 6: EXPORTAR ── -->
     <div id="etapa-6" class="card-etapa" style="display:none">
       <h2>Passo 6 — Revisar e Exportar</h2>
-      <p class="descricao-etapa">Confira o resumo abaixo antes de gerar o contrato. Se precisar corrigir algum dado, clique em "Voltar".</p>
+      <p class="descricao-etapa">Confira o semáforo de risco e o resumo abaixo antes de gerar o contrato. Se precisar corrigir algum dado, clique em "Voltar".</p>
+
+      <div id="semaforo-wrap"></div>
 
       <div class="resumo-contrato" id="resumo-final"></div>
 
@@ -869,6 +961,7 @@
     <p>Este sistema gera um modelo contratual com base nas informações fornecidas por você.</p>
     <p><strong>A responsabilidade pelo preenchimento correto e pela adequação do contrato à realidade do serviço é exclusivamente da empresa preenchente.</strong></p>
     <p>O advogado responsável pela elaboração deste modelo não responde por erros, omissões ou informações incorretas inseridas neste formulário, nem por eventuais nulidades ou condenações decorrentes de preenchimento inadequado.</p>
+    <p style="background:#fbeaea;border-left:3px solid #8b2a2a;padding:10px 14px;font-size:13px;border-radius:6px;color:#7a1f1f"><strong>Vale a realidade dos fatos, não o papel.</strong> A validade da contratação PJ depende da <strong>autonomia efetiva</strong> do prestador (primazia da realidade — art. 9º da CLT). O tema está em repercussão geral no STF (<strong>Tema 1389 · ARE 1.532.603</strong>), com suspensão nacional dos processos desde 14/04/2025 — ainda sem tese definitiva de mérito. Redobre a cautela.</p>
     <p>Em caso de dúvida sobre qualquer campo, consulte o advogado responsável antes de gerar o documento.</p>
     <div style="background:#e8f4fd;border:1.5px solid #2563a8;border-radius:8px;padding:14px 16px;margin-top:4px">
       <p style="margin:0;font-size:13px;color:#1a3a5c"><strong>📋 Próximo passo obrigatório:</strong> Após gerar o documento, envie-o para revisão e validação jurídica <strong>antes de assinar</strong>.<br><br>
@@ -977,7 +1070,7 @@ function voltar(de) { mostrarEtapa(de - 1); }
 const camposObrigatorios = {
   1: ['cont_cnpj','cont_nome','cont_rep','cont_rep_cpf','cont_rep_cargo','cont_rua','cont_num','cont_cidade','cont_uf'],
   2: ['ctda_cnpj','ctda_nome','ctda_qual','ctda_rua','ctda_num','ctda_cidade','ctda_uf'],
-  3: ['obj_desc','obj_local','vig_inicio','foro_cidade','foro_uf'],
+  3: ['obj_desc','obj_entregaveis','obj_local','vig_inicio','foro_cidade','foro_uf'],
   4: ['rem_valor','rem_extenso','rem_dia'],
   5: [],
 };
@@ -1259,7 +1352,9 @@ function gerarResumo() {
     ['CNPJ Contratada', g('ctda_cnpj')],
     ['Endereço Contratada', endCtda],
     ['---',''],
-    ['Objeto', g('obj_desc')],
+    ['Objeto (natureza)', g('obj_desc')],
+    ['Entregáveis', g('obj_entregaveis')],
+    ['Periodicidade', g('obj_period')],
     ['Local de execução', g('obj_local')],
     ['Início', g('vig_inicio') ? formatarData(g('vig_inicio')) : '—'],
     ['Vigência', g('vig_tipo') === 'determinado' ? 'Determinado até ' + formatarData(g('vig_fim')) : 'Indeterminado'],
@@ -1267,9 +1362,12 @@ function gerarResumo() {
     ['---',''],
     ['Valor Mensal', 'R$ ' + g('rem_valor') + ' (' + g('rem_extenso') + ')'],
     ['Dia de Pagamento', 'Dia ' + g('rem_dia') + ' do mês subsequente'],
+    ['Reembolso de despesas', chk('opt_reemb') ? 'Sim — mediante comprovação' + (g('reemb_tipos') ? ' (' + g('reemb_tipos') + ')' : '') : 'Não'],
     ['---',''],
     ['Foro', g('foro_cidade') + '/' + g('foro_uf')],
     ['Rem. Variável', chk('opt_var') ? 'Sim — ' + g('var_meta') : 'Não'],
+    ['Substituibilidade', chk('opt_subst') ? 'Sim (afasta pessoalidade)' : 'Não'],
+    ['Meios próprios / risco', chk('opt_risco') ? 'Sim (reforça autonomia)' : 'Não'],
     ['Visitas Presenciais', chk('opt_vis') ? 'Sim' : 'Não'],
     ['Habilitação Profissional', chk('opt_hab') ? g('hab_conselho') : 'Não aplicável'],
     ['Subcontratação', chk('opt_sub') ? 'Permitida' : 'Não prevista'],
@@ -1281,6 +1379,7 @@ function gerarResumo() {
     if (v) html += `<div class="resumo-item"><span class="resumo-chave">${k}:</span><span>${v}</span></div>`;
   });
   document.getElementById('resumo-final').innerHTML = html;
+  renderSemaforo();
   carregarHistorico();
 }
 
@@ -1329,6 +1428,192 @@ function exportarPDF() {
   win.document.close();
 }
 
+// ══════════════════════════════════════════════
+// MOTOR DE CLÁUSULAS — fonte ÚNICA (consumida por PDF e DOCX)
+// Blindagem do CONTRATANTE ancorada em ADPF 324 / Tema 725 + marcadores de autonomia.
+// Itens SEM o prefixo "N.M" (a numeração é aplicada no render pela posição da cláusula).
+// ══════════════════════════════════════════════
+function montarClausulas(g, chk) {
+  const cl = [];
+  const add = (titulo, itens, num = true) => cl.push({ titulo, itens, num });
+
+  const entreg = g('obj_entregaveis');
+  const period = g('obj_period');
+  const vigTexto = g('vig_tipo') === 'determinado'
+    ? `O presente contrato tem início em ${formatarData(g('vig_inicio'))} e término em ${formatarData(g('vig_fim'))}, podendo ser prorrogado por mútuo acordo mediante Termo Aditivo.`
+    : `O presente contrato tem início em ${formatarData(g('vig_inicio'))} e vigorará por prazo indeterminado.`;
+
+  // I — OBJETO E ENTREGÁVEIS
+  add('DO OBJETO E DOS ENTREGÁVEIS', [
+    `O presente contrato tem por objeto a prestação autônoma, pela CONTRATADA, de ${g('obj_desc')||'serviços técnicos'}${g('obj_local') ? `, com execução orientada a resultados mensuráveis em ${g('obj_local')}` : ', com execução orientada a resultados mensuráveis'}.`,
+    `Os produtos da prestação (entregáveis) compreendem, essencialmente: ${entreg || 'os itens descritos no Anexo Técnico'}${period ? `. Periodicidade das entregas: ${period}` : ''}.`,
+    `Os serviços específicos, entregáveis, prazos, periodicidade e critérios de avaliação encontram-se descritos no Anexo Técnico, parte integrante e indissociável deste instrumento, assinado simultaneamente.`,
+    `O objeto NÃO consiste na ocupação de cargo, função, emprego ou posto de trabalho na estrutura da CONTRATANTE, mas na entrega autônoma dos produtos previstos no Anexo Técnico.`,
+    `A contratação de pessoa jurídica para a prestação destes serviços é lícita e constitucionalmente amparada (STF, ADPF 324 e Tema 725 da repercussão geral; arts. 1º, IV, e 170 da Constituição Federal), bem como pelo art. 4º-A da Lei nº 6.019/1974.`
+  ]);
+
+  // II — NATUREZA CIVIL E AUTONOMIA
+  const nat = [
+    `O presente instrumento é de natureza estritamente civil e empresarial, não estabelecendo qualquer vínculo empregatício entre as partes, à luz da liberdade de organização da atividade econômica reconhecida pelo Supremo Tribunal Federal (ADPF 324 e Tema 725) e do art. 4º-A, § 2º, da Lei nº 6.019/1974.`,
+    `A CONTRATADA atuará com absoluta autonomia técnica, diretiva e administrativa, gerindo livremente seus métodos, ferramentas, horários e rotinas de trabalho, sem ingerência da CONTRATANTE quanto ao modo de execução.`,
+    `A CONTRATANTE obriga-se a não exercer poder de direção, controle de jornada ou poder disciplinar sobre a CONTRATADA, seus prepostos ou subcontratados. O descumprimento constitui falta grave apta a ensejar rescisão imediata por iniciativa da CONTRATADA, com apuração de perdas e danos.`,
+    `As reuniões periódicas de alinhamento têm natureza exclusiva de prestação de contas sobre os entregáveis do Anexo Técnico, não configurando supervisão hierárquica, controle de jornada ou do modo de execução.`,
+    `Quando necessário ao cumprimento do objeto, a CONTRATANTE poderá disponibilizar acesso a sistemas ou equipamentos próprios, exclusivamente para fins técnicos delimitados no Anexo Técnico, mediante credencial individual e registro de acesso, sem que isso configure integração da CONTRATADA à sua estrutura organizacional ou altere a natureza civil da relação.`
+  ];
+  if (chk('opt_risco')) nat.push(`A CONTRATADA executa o objeto com meios, equipamentos e insumos próprios e assume integralmente os riscos econômicos da atividade, arcando com seus custos operacionais, tributários e previdenciários.`);
+  add('DA NATUREZA CIVIL E DA AUTONOMIA', nat);
+
+  // III — AUSÊNCIA DE PESSOALIDADE E EXCLUSIVIDADE
+  const pess = [
+    `O contrato visa à entrega dos resultados previstos no Anexo Técnico, não sendo intuitu personae em relação ao titular ou aos prepostos da CONTRATADA.`,
+    `É assegurado à CONTRATADA o direito de prestar serviços a quaisquer outros tomadores, concorrentes ou não da CONTRATANTE, sem exclusividade.`
+  ];
+  if (chk('opt_subst')) pess.push(`A CONTRATADA poderá fazer-se substituir, na execução dos serviços, por profissional ou preposto de sua escolha e sob sua exclusiva responsabilidade, independentemente de anuência da CONTRATANTE, preservada a qualidade dos entregáveis.`);
+  if (chk('opt_sub')) pess.push(`A CONTRATADA poderá subcontratar terceiros devidamente habilitados, sendo exclusivamente responsável por remunerá-los e dirigi-los (art. 4º-A, § 1º, da Lei nº 6.019/1974). É vedada a subcontratação de profissional inabilitado para atividades que exijam registro regulamentado.`);
+  add('DA AUSÊNCIA DE PESSOALIDADE E DE EXCLUSIVIDADE', pess);
+
+  // IV — REMUNERAÇÃO
+  const rem = [
+    `Pelos serviços entregues conforme o Anexo Técnico, a CONTRATANTE pagará à CONTRATADA o valor fixo mensal de R$ ${g('rem_valor')} (${g('rem_extenso')}).`,
+    `Este valor remunera exclusivamente o conjunto de entregas e produtos previstos no Anexo Técnico, não configurando salário, remuneração por tempo à disposição ou verba de natureza trabalhista.`,
+    `O pagamento será realizado no dia ${g('rem_dia') || '5'} do mês subsequente, condicionado a: (a) entrega e aprovação dos produtos previstos no Anexo Técnico; e (b) emissão da respectiva Nota Fiscal pela CONTRATADA, compatível com seu CNAE vigente.`,
+    `A CONTRATANTE manterá registro formal dos entregáveis aprovados e das notas fiscais recebidas em cada ciclo, formando histórico de due diligence contratual.`
+  ];
+  if (chk('opt_reemb')) rem.push(`Eventuais despesas${g('reemb_tipos') ? ` (${g('reemb_tipos')})` : ''} incorridas pela CONTRATADA no interesse da CONTRATANTE serão reembolsadas exclusivamente mediante comprovação documental idônea (nota fiscal ou recibo), possuindo natureza estritamente indenizatória, sem valor fixo e sem habitualidade remuneratória, não integrando a remuneração para nenhum efeito (art. 457, § 2º, da CLT).`);
+  add('DA REMUNERAÇÃO', rem);
+
+  // V — REMUNERAÇÃO VARIÁVEL (opcional)
+  if (chk('opt_var')) add('DA REMUNERAÇÃO VARIÁVEL POR RESULTADOS', [
+    `Além da remuneração fixa, poderá a CONTRATADA fazer jus a bônus variável atrelado a ${g('var_meta') || 'metas de eficiência operacional'}, cujos critérios objetivos serão pactuados em Termo Aditivo específico, a celebrar-se em até ${g('var_prazo') || '60'} dias da assinatura.`,
+    `O bônus variável possui natureza de prestação civil por resultado, será sempre pago mediante Nota Fiscal e não configura salário variável, comissão ou verba trabalhista. Sua percepção eventual não gera direito adquirido a pagamentos futuros.`
+  ]);
+
+  // VI — COMPLIANCE, REGULARIDADE E QUARENTENA
+  add('DO COMPLIANCE, DA REGULARIDADE E DA QUARENTENA', [
+    `A CONTRATADA declara, sob as penas da lei: (a) possuir regularidade fiscal e previdenciária; (b) que seus titulares ou sócios não prestaram serviços à CONTRATANTE, nos últimos 18 (dezoito) meses, na qualidade de empregado ou de trabalhador sem vínculo empregatício, ressalvada a hipótese de titular ou sócio aposentado (art. 5.º-C da Lei nº 6.019/1974)${chk('opt_quarentena') ? `, registrando que a prestação anterior foi encerrada em ${formatarData(g('quarentena_data'))}, já decorrido o prazo de 18 (dezoito) meses` : ''}; (c) que não alocará na execução deste contrato empregado demitido pela CONTRATANTE antes do decurso do prazo de 18 (dezoito) meses contados da respectiva demissão (art. 5.º-D da Lei nº 6.019/1974); e (d) possuir CNAE vigente compatível com o objeto deste contrato.`,
+    `A falsidade de qualquer dessas declarações constitui falta grave e autoriza a rescisão imediata, sujeitando a CONTRATADA ao ressarcimento integral de eventuais condenações suportadas pela CONTRATANTE.`,
+    `A CONTRATANTE exigirá mensalmente, antes do pagamento, comprovantes de regularidade fiscal e previdenciária${chk('opt_hab') ? `, bem como, por estar a atividade contratada sujeita a conselho profissional, o comprovante de regularidade perante ${g('hab_conselho') || 'o conselho de classe competente'}` : ''}, documentando o recebimento para cumprimento do dever de fiscalização (culpa in vigilando — STF, ADPF 324).`
+  ]);
+
+  // VII — RESPONSABILIDADE CIVIL E REGRESSO
+  add('DA RESPONSABILIDADE CIVIL E DO REGRESSO', [
+    `A CONTRATADA é exclusiva responsável pelos danos causados a terceiros em decorrência do exercício de suas atividades técnicas, não respondendo a CONTRATANTE solidariamente por tais atos.`,
+    `Caso a CONTRATANTE seja demandada judicial ou administrativamente — inclusive perante a Justiça do Trabalho — por ato ou omissão imputável à CONTRATADA, esta a ressarcirá integralmente de todos os valores despendidos, incluindo condenações, honorários advocatícios, custas e encargos de sucumbência, na forma de obrigação autônoma, líquida e exigível independentemente de prévia liquidação.`
+  ]);
+
+  // (opcional) EXECUÇÃO REMOTA E VISITAS
+  if (chk('opt_vis')) add('DA EXECUÇÃO REMOTA E DAS VISITAS PRESENCIAIS', [
+    `O cumprimento do objeto dar-se-á, como regra, de forma remota. Visitas presenciais ocorrerão em caráter excepcional — ${g('vis_freq') || 'conforme necessidade técnica para elaboração dos entregáveis'} — sendo o agendamento organizado exclusivamente pela CONTRATADA.`,
+    `É expressamente vedado aos prepostos da CONTRATANTE: (a) exigir comparecimento diário; (b) estabelecer horários fixos; e (c) exercer controle de ponto ou de jornada sobre a CONTRATADA.`
+  ], false);
+
+  // PROPRIEDADE INTELECTUAL
+  add('DA PROPRIEDADE INTELECTUAL DOS ENTREGÁVEIS', [
+    `Todos os laudos, relatórios, planilhas, manuais e demais produtos elaborados pela CONTRATADA no âmbito deste contrato são cedidos à CONTRATANTE de forma plena, irrevogável e definitiva, mediante o pagamento da remuneração contratual (arts. 49 e 50 da Lei nº 9.610/1998). A cessão abrange uso, reprodução, modificação e distribuição, preservados os direitos morais da CONTRATADA.`
+  ], false);
+
+  // CONFIDENCIALIDADE
+  add('DA CONFIDENCIALIDADE E DA NÃO UTILIZAÇÃO COMPETITIVA', [
+    `A CONTRATADA obriga-se a manter absoluto sigilo sobre informações confidenciais da CONTRATANTE acessadas em razão deste contrato, incluindo dados financeiros, operacionais, estratégicos e de clientes.`,
+    `A obrigação de sigilo persiste por 3 (três) anos após o término do contrato. A vedação de não utilização competitiva abrange especificamente o uso de informações confidenciais para beneficiar concorrentes diretos da CONTRATANTE.`,
+    `A violação desta cláusula sujeita a infratora ao pagamento de multa equivalente a 6 (seis) mensalidades do valor contratual, sem prejuízo da reparação de danos adicionais comprovados e da tutela inibitória do art. 497, parágrafo único, do CPC.`
+  ], false);
+
+  // PROTEÇÃO DE DADOS (LGPD)
+  add('DA PROTEÇÃO DE DADOS PESSOAIS', [
+    `No tratamento de dados pessoais a que tenha acesso em razão deste contrato, a CONTRATADA observará a Lei nº 13.709/2018 (LGPD), utilizando-os estritamente para a execução do objeto, adotando medidas de segurança adequadas e eliminando-os ao término do contrato, salvo obrigação legal de retenção. A CONTRATADA responde por perdas e danos decorrentes do tratamento irregular a que der causa.`
+  ], false);
+
+  // DECLARAÇÕES E GARANTIAS
+  add('DAS DECLARAÇÕES E GARANTIAS RECÍPROCAS', [
+    `Cada parte declara e garante à outra que: (a) tem plena capacidade jurídica para celebrar este contrato; (b) não existe impedimento legal, judicial, administrativo ou regulatório que inviabilize o cumprimento das obrigações assumidas; (c) as informações prestadas são verdadeiras; e (d) o instrumento foi livremente negociado, sem coação, dolo ou erro.`,
+    `A falsidade de qualquer dessas declarações confere à parte prejudicada o direito de rescisão imediata, com apuração de perdas e danos.`
+  ], false);
+
+  // HABILITAÇÃO (opcional)
+  if (chk('opt_hab')) add('DA HABILITAÇÃO PROFISSIONAL', [
+    `A CONTRATADA declara possuir habilitação profissional regular e ativa perante ${g('hab_conselho') || 'o conselho de classe competente'}, comprometendo-se a apresentar comprovante de regularidade sempre que solicitado, obrigatoriamente antes do início da prestação. A suspensão ou cassação do registro constitui falta grave, autorizando a rescisão imediata.`
+  ], false);
+
+  // VIGÊNCIA E RESCISÃO
+  add('DA VIGÊNCIA E DA RESCISÃO', [
+    vigTexto,
+    `Rescisão imotivada: qualquer das partes poderá resilir o contrato mediante aviso prévio escrito com antecedência mínima de ${g('vig_aviso') || '30'} dias. O descumprimento do prazo de aviso prévio enseja cláusula penal compensatória equivalente a 1 (uma) mensalidade do valor contratual.`,
+    `Rescisão por falta grave, a título exemplificativo: (a) prática de fraude ou dolo; (b) violação da confidencialidade; (c) descumprimento reiterado dos prazos do Anexo Técnico; (d) falsidade das declarações e garantias prestadas${chk('opt_hab') ? `; (e) suspensão ou cassação da habilitação perante ${g('hab_conselho') || 'o conselho competente'}` : ''}; e a prática de atos que importem descrédito comercial ou moral da outra parte.`
+  ], false);
+
+  // MEDIAÇÃO E FORO
+  add('DA MEDIAÇÃO PRÉVIA E DO FORO', [
+    `As partes elegem a mediação prévia obrigatória (Lei nº 13.140/2015) como condição de procedibilidade para quaisquer litígios civis decorrentes deste contrato, ressalvados os casos de urgência cautelar. Esta cláusula não se aplica a reclamações perante a Justiça do Trabalho.`,
+    `Não havendo acordo na mediação, fica eleito o Foro da Comarca de ${g('foro_cidade')}/${g('foro_uf')}, com renúncia expressa a qualquer outro, nos termos do art. 63 do CPC.`
+  ], false);
+
+  return cl;
+}
+
+// ── DETECTOR DE "CARGO" NO OBJETO (aviso inline) ──
+function detectarCargo() {
+  const g = id => ((document.getElementById(id) || {}).value || '').toLowerCase();
+  const txt = g('obj_desc') + ' ' + g('obj_entregaveis');
+  const gatilhos = ['coordenador','coordenar','coordenação','coordenacao','gerente','gerência','gerencia','gestor','chefe','chefia','supervisor','supervisiona','diretor','ocupar o cargo','o cargo de','função de','posto de trabalho','subordinad','bater ponto','controle de ponto','carteira assinada','registro em ctps','minha equipe','sua equipe','equipe da empresa','equipe da contratante','jornada de trabalho','horário de trabalho'];
+  const achou = gatilhos.some(w => txt.includes(w));
+  const el = document.getElementById('aviso-cargo');
+  if (el) el.classList.toggle('on', achou);
+  return achou;
+}
+
+// ── QUARENTENA 18 MESES (art. 5º-C Lei 6.019/74) ──
+function quarentenaCumprida(dataStr) {
+  if (!dataStr) return false;
+  const p = String(dataStr).split('-').map(Number);
+  if (p.length !== 3 || p.some(isNaN)) return false;
+  // Data ISO lida por componentes: new Date("YYYY-MM-DD") e UTC e erra 1 dia em fuso negativo.
+  const limite = new Date(p[0], (p[1] - 1) + 18, p[2]);
+  const hoje = new Date();
+  return new Date(hoje.getFullYear(), hoje.getMonth(), hoje.getDate()) >= limite;
+}
+
+// ── CÁLCULO E RENDER DO SEMÁFORO DE RISCO ──
+function calcularRisco() {
+  const chk = id => !!(document.getElementById(id) || {}).checked;
+  const g = id => (document.getElementById(id) || {}).value || '';
+  const riscos = [], mitig = [];
+  if (chk('risk_exclusiv')) riscos.push({ t: 'a empresa exige exclusividade do prestador', grave: false });
+  if (chk('risk_jornada')) riscos.push({ t: 'há controle de horário/jornada ou exigência de presença diária', grave: true });
+  if (chk('risk_equipe')) riscos.push({ t: 'o prestador chefia/dirige empregados da própria contratante (subordinação estrutural)', grave: true });
+  if (chk('risk_porfora')) riscos.push({ t: 'há pagamento "por fora", sem nota fiscal, atrelado à produção', grave: true });
+  if (detectarCargo()) riscos.push({ t: 'o objeto descreve um cargo/função, não um serviço técnico', grave: false });
+  if (chk('opt_quarentena') && !quarentenaCumprida(g('quarentena_data'))) riscos.push({ t: 'ex-empregado CLT sem os 18 meses de quarentena cumpridos (art. 5º-C da Lei 6.019/74)', grave: true });
+
+  if (chk('opt_subst')) mitig.push('substituibilidade (afasta a pessoalidade)');
+  if (chk('opt_risco')) mitig.push('meios próprios e risco do negócio (reforça a autonomia)');
+  if (!chk('risk_exclusiv')) mitig.push('ausência de exclusividade');
+  return { riscos, mitig };
+}
+
+function renderSemaforo() {
+  const wrap = document.getElementById('semaforo-wrap');
+  if (!wrap) return;
+  const { riscos, mitig } = calcularRisco();
+  const grave = riscos.some(r => r.grave);
+  let cls, titulo, msg;
+  if (riscos.length === 0) {
+    cls = 'verde'; titulo = '✅ Risco baixo';
+    msg = 'Nenhum sinal de subordinação declarado e há marcadores de autonomia. Ainda assim, o contrato só protege se a autonomia for real no dia a dia (primazia da realidade — art. 9º da CLT).';
+  } else if (grave || riscos.length >= 3) {
+    cls = 'vermelho'; titulo = '🔴 Risco alto de vínculo';
+    msg = 'Os fatos abaixo costumam levar a Justiça do Trabalho a reconhecer vínculo, apesar do contrato (STF, ADPF 324/Tema 725, exige autonomia efetiva). NÃO gere sem falar com o advogado responsável.';
+  } else {
+    cls = 'amarelo'; titulo = '🟡 Atenção';
+    msg = 'Há sinais que enfraquecem a autonomia. Ajuste a realidade da prestação ou reforce os marcadores de autonomia antes de assinar.';
+  }
+  let h = `<div class="semaforo ${cls}"><h4>${titulo}</h4><p>${msg}</p>`;
+  if (riscos.length) h += '<p style="margin-top:8px"><strong>Sinais de risco:</strong></p><ul>' + riscos.map(r => `<li>${r.grave ? '🔴 ' : '🟡 '}${r.t}</li>`).join('') + '</ul>';
+  if (mitig.length) h += '<p style="margin-top:8px"><strong>Marcadores de autonomia ativos:</strong></p><ul>' + mitig.map(m => `<li>✅ ${m}</li>`).join('') + '</ul>';
+  h += '</div>';
+  wrap.innerHTML = h;
+}
+
 // ── GERAR HTML DO CONTRATO (usado por PDF e DOCX) ──
 function gerarHTMLContrato() {
   const g = id => (document.getElementById(id)||{}).value||'';
@@ -1338,13 +1623,6 @@ function gerarHTMLContrato() {
   const vigTexto = g('vig_tipo')==='determinado'
     ? `O presente contrato tem início em ${formatarData(g('vig_inicio'))} e término em ${formatarData(g('vig_fim'))}, podendo ser prorrogado por mútuo acordo mediante Termo Aditivo.`
     : `O presente contrato tem início em ${formatarData(g('vig_inicio'))} e vigorará por prazo indeterminado.`;
-
-  let n = 1;
-  const cl = (titulo, ...itens) => {
-    const num = n++;
-    const romano = ['I','II','III','IV','V','VI','VII','VIII','IX','X','XI','XII','XIII','XIV','XV'][num-1]||num;
-    return `<div class="cl-titulo">CLÁUSULA ${romano} — ${titulo}</div>` + itens.map(t=>`<p class="cl-item">${t}</p>`).join('');
-  };
 
   const pos = getPosLogo();
   const logoHtml = logoImgTag();
@@ -1357,86 +1635,13 @@ function gerarHTMLContrato() {
 <p>As partes acima qualificadas celebram o presente Contrato de Prestação de Serviços Técnicos, que se regerá pelas seguintes cláusulas e condições:</p>
 </div>`;
 
-  html += cl('DO OBJETO E DO ANEXO TÉCNICO',
-    `1.1 O presente contrato tem por objeto a ${g('obj_desc')}, com execução focada em resultados operacionais mensuráveis em ${g('obj_local')}.`,
-    `1.2 Os serviços específicos, entregáveis, prazos, periodicidade e critérios de avaliação encontram-se descritos no Anexo Técnico, parte integrante e indissociável deste instrumento, assinado simultaneamente.`,
-    `1.3 A terceirização é lícita nos termos dos arts. 4.º-A e 5.º-A da Lei nº 6.019/1974, inclusive para atividades relacionadas ao objeto social da CONTRATANTE (STF, ADPF 324, Tema 725).`
-  );
-
-  html += cl('DA NATUREZA JURÍDICA E DA AUTONOMIA',
-    `2.1 O presente instrumento é de natureza estritamente civil e empresarial, não estabelecendo qualquer vínculo empregatício entre as partes, nos termos do art. 4.º-A, § 2.º, da Lei nº 6.019/1974.`,
-    `2.2 A CONTRATADA atuará com absoluta autonomia técnica, diretiva e administrativa, gerindo livremente seus métodos, ferramentas e rotinas de trabalho.`,
-    `2.3 A CONTRATANTE obriga-se a não exercer poder de direção, controle de jornada ou poder disciplinar sobre a CONTRATADA, seus prepostos ou subcontratados. O descumprimento constitui falta grave apta a ensejar rescisão imediata por iniciativa da CONTRATADA, com apuração de perdas e danos.`,
-    `2.4 As reuniões periódicas de alinhamento têm natureza exclusiva de prestação de contas sobre os entregáveis do Anexo Técnico, não configurando supervisão hierárquica nem controle da jornada ou do modo de execução.`,
-    `2.5 Quando necessário ao cumprimento do objeto, a CONTRATANTE poderá disponibilizar acesso a sistemas ou equipamentos próprios, exclusivamente para fins técnicos delimitados no Anexo Técnico, mediante credencial individual e registro de acesso. Tal disponibilização não configura integração da CONTRATADA à estrutura organizacional da CONTRATANTE nem altera a natureza civil da relação.`
-  );
-
-  html += cl('DA AUSÊNCIA DE PESSOALIDADE E EXCLUSIVIDADE',
-    `3.1 O contrato visa à entrega de resultados previstos no Anexo Técnico, não sendo intuitu personae em relação ao representante da CONTRATADA.`,
-    `3.2 É assegurado à CONTRATADA o direito de prestar serviços a quaisquer outros tomadores, concorrentes ou não da CONTRATANTE, sem exclusividade.`,
-    ...(chk('opt_sub')?[`3.3 A CONTRATADA poderá subcontratar terceiros devidamente habilitados, sendo exclusivamente responsável por remunerá-los e dirigi-los (art. 4.º-A, § 1.º, Lei nº 6.019/1974). É vedada a subcontratação de profissional inabilitado para atividades que exijam registro regulamentado.`]:[])
-  );
-
-  html += cl('DA REMUNERAÇÃO FIXA',
-    `4.1 Pelos serviços entregues conforme o Anexo Técnico, a CONTRATANTE pagará à CONTRATADA o valor fixo mensal de R$ ${g('rem_valor')} (${g('rem_extenso')}).`,
-    `4.2 Este valor remunera exclusivamente o conjunto de entregas e produtos previstos no Anexo Técnico, não configurando salário, remuneração por tempo à disposição ou verba de natureza trabalhista.`,
-    `4.3 O pagamento será realizado no dia ${g('rem_dia')} do mês subsequente, condicionado a: (a) entrega e aprovação de todos os produtos previstos no Anexo Técnico; e (b) emissão da respectiva Nota Fiscal pela CONTRATADA, compatível com seu CNAE vigente.`,
-    `4.4 A CONTRATANTE manterá registro formal dos entregáveis aprovados e notas fiscais recebidas em cada ciclo, formando histórico de due diligence contratual.`
-  );
-
-  if(chk('opt_var')) html += cl('DA REMUNERAÇÃO VARIÁVEL POR RESULTADOS',
-    `5.1 Além da remuneração fixa, poderá a CONTRATADA fazer jus a bônus variável atrelado a ${g('var_meta')||'metas de eficiência operacional'}, cujos critérios objetivos serão pactuados em Termo Aditivo específico, a celebrar-se em até ${g('var_prazo')||'60'} dias da assinatura.`,
-    `5.2 O bônus variável possui natureza de prestação civil por resultado, não configurando salário variável, comissão ou verba trabalhista. Sua percepção eventual não gera direito adquirido a pagamentos futuros.`
-  );
-
-  const nComp = chk('opt_var')?6:5;
-  html += cl('DO COMPLIANCE, REGULARIDADE E QUARENTENA',
-    `${nComp}.1 A CONTRATADA declara, sob as penas da lei: (a) possuir regularidade fiscal e previdenciária; (b) que seus titulares ou sócios não prestaram serviços à CONTRATANTE, nos últimos 18 (dezoito) meses, na qualidade de empregado ou de trabalhador sem vínculo empregatício, ressalvada a hipótese de titular ou sócio aposentado (art. 5.º-C da Lei nº 6.019/1974)${chk('opt_quarentena')?', registrando que a prestação anterior foi encerrada em '+formatarData(g('quarentena_data'))+', já decorrido o prazo de 18 (dezoito) meses':''}; (c) que não alocará na execução deste contrato empregado demitido pela CONTRATANTE antes do decurso do prazo de 18 (dezoito) meses contados da respectiva demissão (art. 5.º-D da Lei nº 6.019/1974); e (d) possuir CNAE vigente compatível com o objeto deste contrato.`,
-    `${nComp}.2 A falsidade de qualquer dessas declarações constitui falta grave e autoriza rescisão imediata, sujeitando a CONTRATADA ao ressarcimento integral de eventuais condenações suportadas pela CONTRATANTE.`,
-    `${nComp}.3 A CONTRATANTE exigirá mensalmente, antes do pagamento, comprovantes de regularidade fiscal e previdenciária e, quando a atividade contratada estiver sujeita a conselho profissional, também o comprovante de regularidade perante o conselho de classe competente, documentando o recebimento para cumprimento do dever de fiscalização (culpa in vigilando — STF, ADPF 324).`
-  );
-
-  const nResp = nComp+1;
-  html += cl('DA RESPONSABILIDADE CIVIL E REGRESSO',
-    `${nResp}.1 A CONTRATADA é exclusiva responsável pelos danos causados a terceiros em decorrência do exercício de suas atividades técnicas, não respondendo a CONTRATANTE solidariamente por tais atos.`,
-    `${nResp}.2 Caso a CONTRATANTE seja demandada judicialmente ou administrativamente — inclusive na Justiça do Trabalho — por ato ou omissão imputável à CONTRATADA, esta ressarcirá integralmente a CONTRATANTE de todos os valores despendidos, incluindo condenações, honorários advocatícios, custas e encargos de sucumbência, na forma de obrigação autônoma, líquida e exigível independentemente de liquidação por arbitramento.`,
-    `${nResp}.3 A CONTRATANTE responderá subsidiariamente pelas obrigações legais decorrentes da execução, exclusivamente quando configurada culpa in vigilando (art. 5.º-A, § 5.º, Lei nº 6.019/1974).`
-  );
-
-  if(chk('opt_vis')) html += cl('DA EXECUÇÃO REMOTA E DAS VISITAS PRESENCIAIS',
-    `O cumprimento do objeto dar-se-á, como regra, de forma remota. Visitas presenciais ocorrerão em caráter excepcional — ${g('vis_freq')||'conforme necessidade técnica'} — sendo o agendamento organizado exclusivamente pela CONTRATADA.`,
-    `É expressamente vedado aos prepostos da CONTRATANTE: (a) exigir comparecimento diário; (b) estabelecer horários fixos; e (c) exercer controle de ponto ou jornada sobre a CONTRATADA.`
-  );
-
-  html += cl('DA PROPRIEDADE INTELECTUAL DOS ENTREGÁVEIS',
-    `Todos os laudos, relatórios, planilhas, manuais e demais produtos elaborados pela CONTRATADA no âmbito deste contrato são cedidos à CONTRATANTE de forma plena, irrevogável e definitiva, mediante o pagamento da remuneração contratual (arts. 49 e 50, Lei nº 9.610/1998). A cessão abrange uso, reprodução, modificação e distribuição, preservados os direitos morais da CONTRATADA.`
-  );
-
-  html += cl('DA CONFIDENCIALIDADE E NÃO UTILIZAÇÃO COMPETITIVA',
-    `A CONTRATADA obriga-se a manter absoluto sigilo sobre informações confidenciais da CONTRATANTE acessadas em decorrência deste contrato, incluindo dados financeiros, operacionais, estratégicos e de clientes.`,
-    `A obrigação de sigilo persiste por 3 (três) anos após o término do contrato. A vedação de não utilização competitiva abrange especificamente o uso de informações confidenciais para beneficiar concorrentes diretos da CONTRATANTE.`,
-    `A violação desta cláusula sujeita a infratora ao pagamento de multa equivalente a 6 (seis) mensalidades do valor contratual, sem prejuízo de reparação de danos adicionais comprovados e da tutela inibitória do art. 497, parágrafo único, do CPC.`
-  );
-
-  html += cl('DAS DECLARAÇÕES E GARANTIAS RECÍPROCAS',
-    `Cada parte declara e garante à outra que: (a) tem plena capacidade jurídica para celebrar este contrato; (b) não existe impedimento legal, judicial, administrativo ou regulatório que inviabilize o cumprimento das obrigações assumidas; (c) as informações prestadas são verdadeiras; e (d) o instrumento foi livremente negociado, sem coação, dolo ou erro.`,
-    `A falsidade de qualquer dessas declarações confere à parte prejudicada o direito de rescisão imediata com apuração de perdas e danos.`
-  );
-
-  if(chk('opt_hab')) html += cl('DA HABILITAÇÃO PROFISSIONAL',
-    `A CONTRATADA declara possuir habilitação profissional regular e ativa perante ${g('hab_conselho')||'o conselho de classe competente'}, comprometendo-se a apresentar comprovante de regularidade sempre que solicitado, obrigatoriamente antes do início da prestação de serviços. A suspensão ou cassação do registro constitui falta grave, autorizando rescisão imediata.`
-  );
-
-  html += cl('DA VIGÊNCIA E DA RESCISÃO',
-    vigTexto,
-    `Rescisão imotivada: qualquer das partes poderá resilir o contrato mediante aviso prévio escrito com antecedência mínima de ${g('vig_aviso')||'30'} dias. O descumprimento do prazo de aviso prévio pela CONTRATANTE enseja cláusula penal compensatória equivalente a 1 (uma) mensalidade de honorários.`,
-    `Rescisão por falta grave: constitui falta grave, a título exemplificativo: (a) prática de fraude ou dolo; (b) violação da confidencialidade; (c) descumprimento reiterado dos prazos do Anexo Técnico; (d) falsidade das declarações e garantias prestadas neste instrumento; ${chk('opt_hab')?'(e) suspensão ou cassação da habilitação perante '+g('hab_conselho')+'; ':''}(${chk('opt_hab')?'f':'e'}) prática de atos que importem descrédito comercial ou moral da outra parte.`
-  );
-
-  html += cl('DA MEDIAÇÃO PRÉVIA E DO FORO',
-    `As partes elegem a mediação prévia obrigatória (Lei nº 13.140/2015) como condição de procedibilidade para quaisquer litígios civis decorrentes deste contrato, ressalvados os casos de urgência cautelar. Esta cláusula não se aplica a reclamações perante a Justiça do Trabalho.`,
-    `Não havendo acordo na mediação, fica eleito o Foro da Comarca de ${g('foro_cidade')}/${g('foro_uf')}, com renúncia expressa a qualquer outro, nos termos do art. 63 do CPC.`
-  );
+  const clausulas = montarClausulas(g, chk);
+  const ROM = ['I','II','III','IV','V','VI','VII','VIII','IX','X','XI','XII','XIII','XIV','XV','XVI','XVII','XVIII','XIX','XX'];
+  clausulas.forEach((c, i) => {
+    const nn = i + 1;
+    html += `<div class="cl-titulo">CLÁUSULA ${ROM[i]||nn} — ${c.titulo}</div>`;
+    html += c.itens.map((t, j) => `<p class="cl-item">${c.num ? `${nn}.${j+1} ` : ''}${t}</p>`).join('');
+  });
 
   html += `<div class="assinaturas">
 <p>E, por estarem justas e contratadas, assinam o presente em 02 (duas) vias de igual teor e forma.</p>
@@ -1490,9 +1695,8 @@ async function exportarDocx() {
     ? `O presente contrato tem início em ${formatarData(g('vig_inicio'))} e término em ${formatarData(g('vig_fim'))}, podendo ser prorrogado por mútuo acordo mediante Termo Aditivo.`
     : `O presente contrato tem início em ${formatarData(g('vig_inicio'))} e vigorará por prazo indeterminado.`;
 
-  let n=1;
-  const romano = ['I','II','III','IV','V','VI','VII','VIII','IX','X','XI','XII','XIII','XIV','XV'];
-  function cl(titulo) { return wCl(`CLÁUSULA ${romano[n++-1]||n} — ${titulo}`); }
+  const clausulas = montarClausulas(g, chk);
+  const romano = ['I','II','III','IV','V','VI','VII','VIII','IX','X','XI','XII','XIII','XIV','XV','XVI','XVII','XVIII','XIX','XX'];
 
   let body = '';
   // Logo no DOCX
@@ -1513,91 +1717,12 @@ async function exportarDocx() {
   body += wPar('As partes acima qualificadas celebram o presente Contrato de Prestação de Serviços Técnicos, que se regerá pelas seguintes cláusulas e condições:');
   body += wLn();
 
-  body += cl('DO OBJETO E DO ANEXO TÉCNICO');
-  body += wPar(`1.1 O presente contrato tem por objeto a ${g('obj_desc')}, com execução focada em resultados operacionais mensuráveis em ${g('obj_local')}.`);
-  body += wPar('1.2 Os serviços específicos, entregáveis, prazos, periodicidade e critérios de avaliação encontram-se descritos no Anexo Técnico, parte integrante e indissociável deste instrumento, assinado simultaneamente.');
-  body += wPar('1.3 A terceirização é lícita nos termos dos arts. 4.º-A e 5.º-A da Lei nº 6.019/1974, inclusive para atividades relacionadas ao objeto social da CONTRATANTE (STF, ADPF 324, Tema 725).');
-  body += wLn();
-
-  body += cl('DA NATUREZA JURÍDICA E DA AUTONOMIA');
-  body += wPar('2.1 O presente instrumento é de natureza estritamente civil e empresarial, não estabelecendo qualquer vínculo empregatício entre as partes, nos termos do art. 4.º-A, § 2.º, da Lei nº 6.019/1974.');
-  body += wPar('2.2 A CONTRATADA atuará com absoluta autonomia técnica, diretiva e administrativa, gerindo livremente seus métodos, ferramentas e rotinas de trabalho.');
-  body += wPar('2.3 A CONTRATANTE obriga-se a não exercer poder de direção, controle de jornada ou poder disciplinar sobre a CONTRATADA, seus prepostos ou subcontratados. O descumprimento constitui falta grave apta a ensejar rescisão imediata por iniciativa da CONTRATADA, com apuração de perdas e danos.');
-  body += wPar('2.4 As reuniões periódicas de alinhamento têm natureza exclusiva de prestação de contas sobre os entregáveis do Anexo Técnico, não configurando supervisão hierárquica nem controle da jornada ou do modo de execução.');
-  body += wPar('2.5 Quando necessário ao cumprimento do objeto, a CONTRATANTE poderá disponibilizar acesso a sistemas ou equipamentos próprios, exclusivamente para fins técnicos delimitados no Anexo Técnico, mediante credencial individual e registro de acesso. Tal disponibilização não configura integração da CONTRATADA à estrutura organizacional da CONTRATANTE nem altera a natureza civil da relação.');
-  body += wLn();
-
-  body += cl('DA AUSÊNCIA DE PESSOALIDADE E EXCLUSIVIDADE');
-  body += wPar('3.1 O contrato visa à entrega de resultados previstos no Anexo Técnico, não sendo intuitu personae em relação ao representante da CONTRATADA.');
-  body += wPar('3.2 É assegurado à CONTRATADA o direito de prestar serviços a quaisquer outros tomadores, concorrentes ou não da CONTRATANTE, sem exclusividade.');
-  if(chk('opt_sub')) body += wPar('3.3 A CONTRATADA poderá subcontratar terceiros devidamente habilitados, sendo exclusivamente responsável por remunerá-los e dirigi-los (art. 4.º-A, § 1.º, Lei nº 6.019/1974). É vedada a subcontratação de profissional inabilitado para atividades que exijam registro regulamentado.');
-  body += wLn();
-
-  body += cl('DA REMUNERAÇÃO FIXA');
-  body += wPar(`4.1 Pelos serviços entregues conforme o Anexo Técnico, a CONTRATANTE pagará à CONTRATADA o valor fixo mensal de R$ ${g('rem_valor')} (${g('rem_extenso')}).`);
-  body += wPar('4.2 Este valor remunera exclusivamente o conjunto de entregas e produtos previstos no Anexo Técnico, não configurando salário, remuneração por tempo à disposição ou verba de natureza trabalhista.');
-  body += wPar(`4.3 O pagamento será realizado no dia ${g('rem_dia')} do mês subsequente, condicionado a: (a) entrega e aprovação de todos os produtos previstos no Anexo Técnico; e (b) emissão da respectiva Nota Fiscal pela CONTRATADA, compatível com seu CNAE vigente.`);
-  body += wPar('4.4 A CONTRATANTE manterá registro formal dos entregáveis aprovados e notas fiscais recebidas em cada ciclo, formando histórico de due diligence contratual.');
-  body += wLn();
-
-  if(chk('opt_var')) {
-    body += cl('DA REMUNERAÇÃO VARIÁVEL POR RESULTADOS');
-    body += wPar(`5.1 Além da remuneração fixa, poderá a CONTRATADA fazer jus a bônus variável atrelado a ${g('var_meta')||'metas de eficiência operacional'}, cujos critérios objetivos serão pactuados em Termo Aditivo específico, a celebrar-se em até ${g('var_prazo')||'60'} dias da assinatura.`);
-    body += wPar('5.2 O bônus variável possui natureza de prestação civil por resultado, não configurando salário variável, comissão ou verba trabalhista. Sua percepção eventual não gera direito adquirido a pagamentos futuros.');
+  clausulas.forEach((c, i) => {
+    const nn = i + 1;
+    body += wCl(`CLÁUSULA ${romano[i]||nn} — ${c.titulo}`);
+    c.itens.forEach((t, j) => { body += wPar(`${c.num ? `${nn}.${j+1} ` : ''}${t}`); });
     body += wLn();
-  }
-
-  const nC = chk('opt_var')?6:5;
-  body += cl('DO COMPLIANCE, REGULARIDADE E QUARENTENA');
-  body += wPar(`${nC}.1 A CONTRATADA declara, sob as penas da lei: (a) possuir regularidade fiscal e previdenciária; (b) que seus titulares ou sócios não prestaram serviços à CONTRATANTE, nos últimos 18 (dezoito) meses, na qualidade de empregado ou de trabalhador sem vínculo empregatício, ressalvada a hipótese de titular ou sócio aposentado (art. 5.º-C da Lei nº 6.019/1974)${chk('opt_quarentena')?', registrando que a prestação anterior foi encerrada em '+formatarData(g('quarentena_data'))+', já decorrido o prazo de 18 (dezoito) meses':''}; (c) que não alocará na execução deste contrato empregado demitido pela CONTRATANTE antes do decurso do prazo de 18 (dezoito) meses contados da respectiva demissão (art. 5.º-D da Lei nº 6.019/1974); e (d) possuir CNAE vigente compatível com o objeto deste contrato.`);
-  body += wPar(`${nC}.2 A falsidade de qualquer dessas declarações constitui falta grave e autoriza rescisão imediata, sujeitando a CONTRATADA ao ressarcimento integral de eventuais condenações suportadas pela CONTRATANTE.`);
-  body += wPar(`${nC}.3 A CONTRATANTE exigirá mensalmente, antes do pagamento, comprovantes de regularidade fiscal e previdenciária e, quando a atividade contratada estiver sujeita a conselho profissional, também o comprovante de regularidade perante o conselho de classe competente, documentando o recebimento para cumprimento do dever de fiscalização (culpa in vigilando — STF, ADPF 324).`);
-  body += wLn();
-
-  const nR = nC+1;
-  body += cl('DA RESPONSABILIDADE CIVIL E REGRESSO');
-  body += wPar(`${nR}.1 A CONTRATADA é exclusiva responsável pelos danos causados a terceiros em decorrência do exercício de suas atividades técnicas, não respondendo a CONTRATANTE solidariamente por tais atos.`);
-  body += wPar(`${nR}.2 Caso a CONTRATANTE seja demandada judicialmente ou administrativamente — inclusive na Justiça do Trabalho — por ato ou omissão imputável à CONTRATADA, esta ressarcirá integralmente a CONTRATANTE de todos os valores despendidos, incluindo condenações, honorários advocatícios, custas e encargos de sucumbência, na forma de obrigação autônoma, líquida e exigível independentemente de liquidação por arbitramento.`);
-  body += wPar(`${nR}.3 A CONTRATANTE responderá subsidiariamente pelas obrigações legais decorrentes da execução, exclusivamente quando configurada culpa in vigilando (art. 5.º-A, § 5.º, Lei nº 6.019/1974).`);
-  body += wLn();
-
-  if(chk('opt_vis')) {
-    body += cl('DA EXECUÇÃO REMOTA E DAS VISITAS PRESENCIAIS');
-    body += wPar('O cumprimento do objeto dar-se-á, como regra, de forma remota. Visitas presenciais ocorrerão em caráter excepcional — '+( g('vis_freq')||'conforme necessidade técnica')+' — sendo o agendamento organizado exclusivamente pela CONTRATADA.');
-    body += wPar('É expressamente vedado aos prepostos da CONTRATANTE: (a) exigir comparecimento diário; (b) estabelecer horários fixos; e (c) exercer controle de ponto ou jornada sobre a CONTRATADA.');
-    body += wLn();
-  }
-
-  body += cl('DA PROPRIEDADE INTELECTUAL DOS ENTREGÁVEIS');
-  body += wPar('Todos os laudos, relatórios, planilhas, manuais e demais produtos elaborados pela CONTRATADA no âmbito deste contrato são cedidos à CONTRATANTE de forma plena, irrevogável e definitiva, mediante o pagamento da remuneração contratual (arts. 49 e 50, Lei nº 9.610/1998). A cessão abrange uso, reprodução, modificação e distribuição, preservados os direitos morais da CONTRATADA.');
-  body += wLn();
-
-  body += cl('DA CONFIDENCIALIDADE E NÃO UTILIZAÇÃO COMPETITIVA');
-  body += wPar('A CONTRATADA obriga-se a manter absoluto sigilo sobre informações confidenciais da CONTRATANTE acessadas em decorrência deste contrato, incluindo dados financeiros, operacionais, estratégicos e de clientes.');
-  body += wPar('A obrigação de sigilo persiste por 3 (três) anos após o término. A vedação de não utilização competitiva abrange especificamente o uso de informações confidenciais para beneficiar concorrentes diretos da CONTRATANTE.');
-  body += wPar('A violação desta cláusula sujeita a infratora ao pagamento de multa equivalente a 6 (seis) mensalidades do valor contratual, sem prejuízo de reparação de danos adicionais comprovados e da tutela inibitória do art. 497, parágrafo único, do CPC.');
-  body += wLn();
-
-  body += cl('DAS DECLARAÇÕES E GARANTIAS RECÍPROCAS');
-  body += wPar('Cada parte declara e garante à outra que: (a) tem plena capacidade jurídica para celebrar este contrato; (b) não existe impedimento legal, judicial, administrativo ou regulatório que inviabilize o cumprimento das obrigações assumidas; (c) as informações prestadas são verdadeiras; e (d) o instrumento foi livremente negociado, sem coação, dolo ou erro.');
-  body += wPar('A falsidade de qualquer dessas declarações confere à parte prejudicada o direito de rescisão imediata com apuração de perdas e danos.');
-  body += wLn();
-
-  if(chk('opt_hab')) {
-    body += cl('DA HABILITAÇÃO PROFISSIONAL');
-    body += wPar(`A CONTRATADA declara possuir habilitação profissional regular e ativa perante ${g('hab_conselho')||'o conselho de classe competente'}, comprometendo-se a apresentar comprovante de regularidade sempre que solicitado. A suspensão ou cassação do registro constitui falta grave, autorizando rescisão imediata.`);
-    body += wLn();
-  }
-
-  body += cl('DA VIGÊNCIA E DA RESCISÃO');
-  body += wPar(vigTexto);
-  body += wPar(`Rescisão imotivada: qualquer das partes poderá resilir o contrato mediante aviso prévio escrito com antecedência mínima de ${g('vig_aviso')||'30'} dias. O descumprimento do prazo de aviso prévio pela CONTRATANTE enseja cláusula penal compensatória equivalente a 1 (uma) mensalidade de honorários.`);
-  body += wPar(`Rescisão por falta grave: (a) prática de fraude ou dolo; (b) violação da confidencialidade; (c) descumprimento reiterado dos prazos do Anexo Técnico; (d) falsidade das declarações e garantias prestadas; ${chk('opt_hab')?'(e) suspensão da habilitação perante '+g('hab_conselho')+'; ':''}(${chk('opt_hab')?'f':'e'}) prática de atos que importem descrédito comercial ou moral da outra parte.`);
-  body += wLn();
-
-  body += cl('DA MEDIAÇÃO PRÉVIA E DO FORO');
-  body += wPar('As partes elegem a mediação prévia obrigatória (Lei nº 13.140/2015) como condição de procedibilidade para quaisquer litígios civis decorrentes deste contrato, ressalvados os casos de urgência cautelar. Esta cláusula não se aplica a reclamações perante a Justiça do Trabalho.');
-  body += wPar(`Não havendo acordo na mediação, fica eleito o Foro da Comarca de ${g('foro_cidade')}/${g('foro_uf')}, com renúncia expressa a qualquer outro, nos termos do art. 63 do CPC.`);
+  });
   body += wLn(); body += wLn();
   body += wPar('E, por estarem justas e contratadas, assinam o presente em 02 (duas) vias de igual teor e forma.');
   body += wLn();
